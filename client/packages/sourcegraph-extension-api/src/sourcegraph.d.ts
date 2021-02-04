@@ -629,6 +629,32 @@ declare module 'sourcegraph' {
         readonly key: string
     }
 
+    /**
+     * A text element displayed in an editor's status bar.
+     * A status bar item can display tooltips on hover and execute commands on click
+     */
+    export interface StatusBarItem {
+        /** The text to display in the status bar */
+        text: string
+
+        /** Tooltip text to display when hovering over the status bar item. */
+        tooltip?: string
+
+        /** The id of and arguments to a command to execute when the status bar item is clicked */
+        command?: { id: string; args?: any[] }
+    }
+
+    /**
+     * Represents a handle to a status bar item.
+     *
+     * To get an instance of {@link StatusBarItemType}, use
+     * {@link sourcegraph.app.createStatusBarItemType}
+     */
+    export interface StatusBarItemType {
+        /** An opaque identifier. */
+        readonly key: string
+    }
+
     export interface Directory {
         /**
          * The URI of the directory.
@@ -1099,6 +1125,15 @@ declare module 'sourcegraph' {
          * text editors using {@link setDecorations}.
          */
         export function createDecorationType(): TextDocumentDecorationType
+
+        /**
+         * Creates a statusBarItemType that can be used to add a status bar item to
+         * the status bar of code views.
+         *
+         * Use this to create a unique handle to a status bar item, that can be applied to
+         * text editors using {@link setStatusBarItem}.
+         */
+        export function createStatusBarItemType(): StatusBarItemType
 
         /**
          * Register a view provider, which provides the contents of a view.
