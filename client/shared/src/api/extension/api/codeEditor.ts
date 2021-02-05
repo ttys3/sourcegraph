@@ -76,7 +76,7 @@ export class ExtensionCodeEditor implements sourcegraph.CodeEditor {
         statusBarItem: sourcegraph.StatusBarItem
     ): void {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.proxy.$setStatusBarItem(this.resource, statusBarItemType.key, statusBarItem)
+        this.proxy.$setStatusBarItem(this.resource, { ...statusBarItem, ...statusBarItemType })
     }
 
     public update(data: Pick<CodeEditorData, 'selections'>): void {

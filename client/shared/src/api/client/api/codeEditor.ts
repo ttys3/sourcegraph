@@ -5,13 +5,13 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs'
 import { ProvideTextDocumentDecorationSignature } from '../services/decoration'
 import { FeatureProviderRegistry } from '../services/registry'
 import { TextDocumentIdentifier } from '../types/textDocument'
-import { StatusBarItem } from 'sourcegraph'
+import { StatusBarItem, StatusBarItemType } from 'sourcegraph'
 import { ProvideStatusBarItemsSignature } from '../services/statusBar'
 
 /** @internal */
 export interface ClientCodeEditorAPI extends ProxyMarked {
     $setDecorations(resource: string, decorationType: string, decorations: TextDocumentDecoration[]): void
-    $setStatusBarItem(resource: string, statusBarItemType: string, statusBarItem: StatusBarItem): void
+    $setStatusBarItem(resource: string, statusBarItem: StatusBarItemWithKey): void
 }
 
 interface PreviousDecorations {
@@ -22,9 +22,10 @@ interface PreviousDecorations {
 
 interface PreviousStatusBarItems {
     [resource: string]: {
-        [decorationType: string]: StatusBarItem
+        [decorationType: string]: StatusBarItemWithKey
     }
 }
+export type StatusBarItemWithKey = StatusBarItem & StatusBarItemType
 
 /** @internal */
 export class ClientCodeEditor implements ClientCodeEditorAPI {
@@ -38,7 +39,7 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
     private previousDecorations: PreviousDecorations = {}
 
     /** Map of document URI to its status bar items (last published by the server). */
-    private statusBarItems = new Map<string, BehaviorSubject<StatusBarItem[]>>()
+    private statusBarItems = new Map<string, BehaviorSubject<StatusBarItemWithKey[]>>()
 
     private previousStatusBarItems: PreviousStatusBarItems = {}
 
@@ -57,7 +58,7 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
         this.subscriptions.add(
             this.statusBarRegistry.registerProvider(
                 undefined,
-                (textDocument: TextDocumentIdentifier): Observable<StatusBarItem[]> =>
+                (textDocument: TextDocumentIdentifier): Observable<StatusBarItemWithKey[]> =>
                     this.getStatusBarItemsSubject(textDocument.uri)
             )
         )
@@ -68,9 +69,9 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
         this.getDecorationsSubject(resource, decorationType, decorations)
     }
 
-    public $setStatusBarItem(resource: string, statusBarItemType: string, statusBarItem: StatusBarItem): void {
+    public $setStatusBarItem(resource: string, statusBarItem: StatusBarItemWithKey): void {
         // eslint-disable-next-line rxjs/no-ignored-observable
-        this.getStatusBarItemsSubject(resource, statusBarItemType, statusBarItem)
+        this.getStatusBarItemsSubject(resource, statusBarItem)
     }
 
     private getDecorationsSubject(
@@ -97,18 +98,17 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
 
     private getStatusBarItemsSubject(
         resource: string,
-        statusBarItemType?: string,
-        statusBarItem?: StatusBarItem
-    ): BehaviorSubject<StatusBarItem[]> {
+        statusBarItem?: StatusBarItemWithKey
+    ): BehaviorSubject<StatusBarItemWithKey[]> {
         let subject = this.statusBarItems.get(resource)
         if (!subject) {
-            subject = new BehaviorSubject<StatusBarItem[]>(statusBarItem ? [statusBarItem] : [])
+            subject = new BehaviorSubject<StatusBarItemWithKey[]>(statusBarItem ? [statusBarItem] : [])
             this.statusBarItems.set(resource, subject)
             this.previousStatusBarItems[resource] = {}
         }
         if (statusBarItem !== undefined) {
             // Replace previous status bar item for this resource + statusBarItemType
-            this.previousStatusBarItems[resource][statusBarItemType!] = statusBarItem
+            this.previousStatusBarItems[resource][statusBarItem.key] = statusBarItem
 
             // Emit all status bar items for this resource
             const nextStatusBarItems = Object.values(this.previousStatusBarItems[resource])

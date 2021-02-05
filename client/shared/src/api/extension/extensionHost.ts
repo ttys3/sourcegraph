@@ -272,5 +272,20 @@ function createExtensionAPI(
             clientApplication: initData.clientApplication,
         },
     }
+    // TODO(tj): Remove demo code once status bar items are implemented in extensions
+    extensionAPI.app.activeWindow?.activeViewComponentChanges.subscribe(viewComponent => {
+        if (viewComponent?.type === 'CodeEditor') {
+            viewComponent.setStatusBarItem({ key: 'test' }, { text: 'Coverage: 96%' })
+        }
+    })
+    extensionAPI.app.activeWindow?.activeViewComponentChanges.subscribe(viewComponent => {
+        if (viewComponent?.type === 'CodeEditor') {
+            viewComponent.setStatusBarItem(
+                { key: 'fake' },
+                { text: '2 code owners', tooltip: 'Code owners: @felixbecker, @beyang' }
+            )
+        }
+    })
+
     return { extensionHostAPI, extensionAPI, subscription }
 }
