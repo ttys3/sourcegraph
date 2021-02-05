@@ -19,6 +19,7 @@ import { ExtensionWindows } from './api/windows'
 import { registerComlinkTransferHandlers } from '../util'
 import { initNewExtensionAPI } from './flatExtensionApi'
 import { SettingsCascade } from '../../settings/settings'
+import { createStatusBarItemType } from './api/codeEditor'
 
 /**
  * Required information when initializing an extension host.
@@ -194,6 +195,7 @@ function createExtensionAPI(
             },
             createPanelView: (id: string) => views.createPanelView(id),
             createDecorationType,
+            createStatusBarItemType,
             registerViewProvider: (id, provider) => views.registerViewProvider(id, provider),
             registerFileDecorationProvider,
         },

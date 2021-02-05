@@ -130,7 +130,7 @@ export async function createExtensionHostClientConnection(
         services.view
     )
 
-    const clientCodeEditor = new ClientCodeEditor(services.textDocumentDecoration)
+    const clientCodeEditor = new ClientCodeEditor(services.textDocumentDecoration, services.statusBar)
     subscription.add(clientCodeEditor)
 
     const clientLanguageFeatures = new ClientLanguageFeatures(

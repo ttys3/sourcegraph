@@ -5,15 +5,24 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs'
 import { ProvideTextDocumentDecorationSignature } from '../services/decoration'
 import { FeatureProviderRegistry } from '../services/registry'
 import { TextDocumentIdentifier } from '../types/textDocument'
+import { StatusBarItem } from 'sourcegraph'
+import { ProvideStatusBarItemsSignature } from '../services/statusBar'
 
 /** @internal */
 export interface ClientCodeEditorAPI extends ProxyMarked {
     $setDecorations(resource: string, decorationType: string, decorations: TextDocumentDecoration[]): void
+    $setStatusBarItem(resource: string, statusBarItemType: string, statusBarItem: StatusBarItem): void
 }
 
 interface PreviousDecorations {
     [resource: string]: {
         [decorationType: string]: TextDocumentDecoration[]
+    }
+}
+
+interface PreviousStatusBarItems {
+    [resource: string]: {
+        [decorationType: string]: StatusBarItem
     }
 }
 
@@ -28,12 +37,28 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
 
     private previousDecorations: PreviousDecorations = {}
 
-    constructor(private registry: FeatureProviderRegistry<undefined, ProvideTextDocumentDecorationSignature>) {
+    /** Map of document URI to its status bar items (last published by the server). */
+    private statusBarItems = new Map<string, BehaviorSubject<StatusBarItem[]>>()
+
+    private previousStatusBarItems: PreviousStatusBarItems = {}
+
+    constructor(
+        private decorationRegistry: FeatureProviderRegistry<undefined, ProvideTextDocumentDecorationSignature>,
+        private statusBarRegistry: FeatureProviderRegistry<undefined, ProvideStatusBarItemsSignature>
+    ) {
         this.subscriptions.add(
-            this.registry.registerProvider(
+            this.decorationRegistry.registerProvider(
                 undefined,
                 (textDocument: TextDocumentIdentifier): Observable<TextDocumentDecoration[]> =>
                     this.getDecorationsSubject(textDocument.uri)
+            )
+        )
+
+        this.subscriptions.add(
+            this.statusBarRegistry.registerProvider(
+                undefined,
+                (textDocument: TextDocumentIdentifier): Observable<StatusBarItem[]> =>
+                    this.getStatusBarItemsSubject(textDocument.uri)
             )
         )
     }
@@ -41,6 +66,11 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
     public $setDecorations(resource: string, decorationType: string, decorations: TextDocumentDecoration[]): void {
         // eslint-disable-next-line rxjs/no-ignored-observable
         this.getDecorationsSubject(resource, decorationType, decorations)
+    }
+
+    public $setStatusBarItem(resource: string, statusBarItemType: string, statusBarItem: StatusBarItem): void {
+        // eslint-disable-next-line rxjs/no-ignored-observable
+        this.getStatusBarItemsSubject(resource, statusBarItemType, statusBarItem)
     }
 
     private getDecorationsSubject(
@@ -61,6 +91,28 @@ export class ClientCodeEditor implements ClientCodeEditorAPI {
             // Merge decorations for all types for this resource, and emit them
             const nextDecorations = flatten(values(this.previousDecorations[resource]))
             subject.next(nextDecorations)
+        }
+        return subject
+    }
+
+    private getStatusBarItemsSubject(
+        resource: string,
+        statusBarItemType?: string,
+        statusBarItem?: StatusBarItem
+    ): BehaviorSubject<StatusBarItem[]> {
+        let subject = this.statusBarItems.get(resource)
+        if (!subject) {
+            subject = new BehaviorSubject<StatusBarItem[]>(statusBarItem ? [statusBarItem] : [])
+            this.statusBarItems.set(resource, subject)
+            this.previousStatusBarItems[resource] = {}
+        }
+        if (statusBarItem !== undefined) {
+            // Replace previous status bar item for this resource + statusBarItemType
+            this.previousStatusBarItems[resource][statusBarItemType!] = statusBarItem
+
+            // Emit all status bar items for this resource
+            const nextStatusBarItems = Object.values(this.previousStatusBarItems[resource])
+            subject.next(nextStatusBarItems)
         }
         return subject
     }

@@ -14,6 +14,7 @@ import { NotificationsService } from './services/notifications'
 import { PanelViewProviderRegistry } from './services/panelViews'
 import { createViewService } from './services/viewService'
 import { createWorkspaceService } from './services/workspaceService'
+import { StatusBarItemProviderRegistry } from './services/statusBar'
 
 /**
  * Services is a container for all services used by the client application.
@@ -55,6 +56,7 @@ export class Services {
     public readonly textDocumentReferences = new TextDocumentLocationProviderRegistry<ReferenceParameters>()
     public readonly textDocumentLocations = new TextDocumentLocationProviderIDRegistry()
     public readonly textDocumentDecoration = new TextDocumentDecorationProviderRegistry()
+    public readonly statusBar = new StatusBarItemProviderRegistry()
     public readonly panelViews = new PanelViewProviderRegistry()
     public readonly completionItems = new CompletionItemProviderRegistry()
     public readonly view = createViewService()

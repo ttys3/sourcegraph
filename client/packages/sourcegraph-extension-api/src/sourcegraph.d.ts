@@ -724,6 +724,16 @@ declare module 'sourcegraph' {
          *
          */
         setDecorations(decorationType: TextDocumentDecorationType, decorations: TextDocumentDecoration[]): void
+
+        /**
+         * Add a status bar item to this editor's status bar. If a status bar item already exists with the given
+         * {@link StatusBarItemType}, it will be replaced.
+         *
+         * @see {@link StatusBarItemType}
+         * @see {@link sourcegraph.app.createStatusBarItemType}
+         *
+         */
+        setStatusBarItem(statusBarItemType: StatusBarItemType, statusBarItem: StatusBarItem): void
     }
 
     /**

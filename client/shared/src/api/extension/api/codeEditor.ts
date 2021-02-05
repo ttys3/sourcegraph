@@ -7,6 +7,9 @@ import { ClientCodeEditorAPI } from '../../client/api/codeEditor'
 import { CodeEditorData, ViewerId } from '../../client/services/viewerService'
 import { createDecorationType } from './decorations'
 import { ExtensionDocuments } from './documents'
+import { uniqueId } from 'lodash'
+
+export const createStatusBarItemType = (): sourcegraph.StatusBarItemType => ({ key: uniqueId('StatusBarItemType') })
 
 const DEFAULT_DECORATION_TYPE = createDecorationType()
 
@@ -31,7 +34,7 @@ export class ExtensionCodeEditor implements sourcegraph.CodeEditor {
     constructor(
         data: CodeEditorData & ViewerId,
         private proxy: Remote<ClientCodeEditorAPI>,
-        private documents: ExtensionDocuments
+        private documents: ExtensionDocuments // TODO(tj): pass in "setStatusBarItem" fn. state will live in ext host
     ) {
         this.resource = data.resource
         this.update(data)
@@ -66,6 +69,14 @@ export class ExtensionCodeEditor implements sourcegraph.CodeEditor {
             decorationType.key,
             decorations.map(fromTextDocumentDecoration).filter(decoration => !isDecorationEmpty(decoration))
         )
+    }
+
+    public setStatusBarItem(
+        statusBarItemType: sourcegraph.StatusBarItemType,
+        statusBarItem: sourcegraph.StatusBarItem
+    ): void {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.proxy.$setStatusBarItem(this.resource, statusBarItemType.key, statusBarItem)
     }
 
     public update(data: Pick<CodeEditorData, 'selections'>): void {
