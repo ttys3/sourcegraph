@@ -3,8 +3,6 @@ package query
 import (
 	"fmt"
 	"regexp"
-
-	"github.com/sourcegraph/sourcegraph/internal/search/query/syntax"
 )
 
 type ExpectedOperand struct {
@@ -107,30 +105,6 @@ func (q Query) Fields() map[string][]*Value {
 		fields[field] = q.Values(field)
 	})
 	return fields
-}
-
-// ParseTree returns a flat, mock-like parse tree of an and/or query. The parse
-// tree values are currently only significant in alerts. Whether it is empty or
-// not is significant for surfacing suggestions.
-func (q Query) ParseTree() syntax.ParseTree {
-	var tree syntax.ParseTree
-	VisitPattern(q, func(value string, negated bool, _ Annotation) {
-		expr := &syntax.Expr{
-			Field: "",
-			Value: value,
-			Not:   negated,
-		}
-		tree = append(tree, expr)
-	})
-	VisitParameter(q, func(field, value string, negated bool, _ Annotation) {
-		expr := &syntax.Expr{
-			Field: field,
-			Value: value,
-			Not:   negated,
-		}
-		tree = append(tree, expr)
-	})
-	return tree
 }
 
 func (q Query) BoolValue(field string) bool {

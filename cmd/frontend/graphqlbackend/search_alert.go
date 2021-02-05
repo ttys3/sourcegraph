@@ -58,13 +58,7 @@ func alertForCappedAndExpression() *searchAlert {
 	}
 }
 
-func toSearchQueryDescription(proposed []*query.ProposedQuery) (result []*searchQueryDescription) {
-	for _, p := range proposed {
-		result = append(result, &searchQueryDescription{
-			description: p.Description,
-			query:       p.Query,
-		})
-	}
+func toSearchQueryDescription(proposed interface{}) (result []*searchQueryDescription) {
 	return result
 }
 
