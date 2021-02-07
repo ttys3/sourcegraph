@@ -48,18 +48,16 @@ export const StatusBar: React.FunctionComponent<StatusBarProps> = ({
 const StatusBarItem: React.FunctionComponent<{ statusBarItem: StatusBarItemWithKey; className?: string }> = ({
     statusBarItem,
     className = 'status-bar',
-}) => {
+}) => (
     // TODO(tj): handle command
 
-    return (
-        <div
-            className={classNames(
-                `${className}__item h-100 d-flex align-items-center px-1`,
-                statusBarItem.tooltip && `${className}__item--tooltipped`
-            )}
-            data-tooltip={statusBarItem.tooltip}
-        >
-            <small className={`${className}__text`}>{statusBarItem.text}</small>
-        </div>
-    )
-}
+    <div
+        className={classNames(
+            `${className}__item h-100 d-flex align-items-center px-1`,
+            statusBarItem.tooltip && `${className}__item--tooltipped`
+        )}
+        data-tooltip={statusBarItem.tooltip}
+    >
+        <small className={`${className}__text`}>{statusBarItem.text}</small>
+    </div>
+)

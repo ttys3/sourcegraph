@@ -16,6 +16,7 @@ import { SettingsCascadeOrError } from '../../../shared/src/settings/settings'
 import { AuthenticatedUser } from '../auth'
 import classNames from 'classnames'
 import { Scalars } from '../../../shared/src/graphql-operations'
+import { ActionItemsToggle, ActionItemsToggleProps } from '../extensions/components/ActionItemsBar'
 
 /**
  * Stores the list of RepoHeaderContributions, manages addition/deletion, and ensures they are sorted.
@@ -124,7 +125,12 @@ export interface RepoHeaderContext {
 
 export interface RepoHeaderActionButton extends ActionButtonDescriptor<RepoHeaderContext> {}
 
-interface Props extends PlatformContextProps, ExtensionsControllerProps, TelemetryProps, BreadcrumbsProps {
+interface Props
+    extends PlatformContextProps,
+        ExtensionsControllerProps,
+        TelemetryProps,
+        BreadcrumbsProps,
+        ActionItemsToggleProps {
     /**
      * An array of render functions for action buttons that can be configured *in addition* to action buttons
      * contributed through {@link RepoHeaderContributionsLifecycleProps} and through extensions.
@@ -246,6 +252,12 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                         {a.element}
                     </li>
                 ))}
+            </ul>
+            <ul className="navbar-nav">
+                <ActionItemsToggle
+                    className="repo-header__action-list-item"
+                    useActionItemsToggle={props.useActionItemsToggle}
+                />
             </ul>
         </nav>
     )

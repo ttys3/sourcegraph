@@ -261,7 +261,8 @@ export function filterContributions(contributions: Evaluated<Contributions>): Ev
     }
     return {
         ...contributions,
-        menus: mapValues(contributions.menus, menuItems => menuItems?.filter(menuItem => menuItem.when !== false)),
+        menus: mapValues(contributions.menus, menuItems => menuItems?.filter(menuItem => menuItem)),
+        // menus: mapValues(contributions.menus, menuItems => menuItems?.filter(menuItem => menuItem.when !== false)),
     }
 }
 

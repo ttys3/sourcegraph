@@ -34,6 +34,8 @@ interface Props extends ActionsProps, TelemetryProps {
     empty?: JSX.Element | null
 }
 
+// TODO(tj): refactor this with hook that will be shared with action items bar. will fix the tree page actions bug/
+
 /** Displays the actions in a container, with a wrapper and/or empty element. */
 export class ActionsContainer extends React.PureComponent<Props, ActionsState> {
     public state: ActionsState = {}
@@ -47,6 +49,7 @@ export class ActionsContainer extends React.PureComponent<Props, ActionsState> {
             combineLatest([this.scopeChanges, this.extraContextChanges])
                 .pipe(
                     switchMap(([scope, extraContext]) =>
+                        // TODO(tj): pass a custom contribution filter, or option to return contributions where "when" === false
                         this.props.extensionsController.services.contribution.getContributions(scope, extraContext)
                     )
                 )

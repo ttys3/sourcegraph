@@ -156,7 +156,7 @@ export class ActionItem extends React.PureComponent<ActionItemProps, State> {
                             className={this.props.iconClassName}
                         />
                     )}{' '}
-                    {this.props.action.actionItem.label}
+                    {/* {this.props.action.actionItem.label} */}
                 </>
             )
             tooltip = this.props.action.actionItem.description

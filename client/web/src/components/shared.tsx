@@ -81,15 +81,18 @@ export const WebActionsNavItems: React.FunctionComponent<ActionsNavItemsProps> =
     actionItemClass,
     actionItemIconClass,
     ...props
-}) => (
-    <ActionsNavItems
-        {...props}
-        listClass={classNames(listClass, 'nav')}
-        listItemClass={classNames(listItemClass, 'nav-item')}
-        actionItemClass={classNames(actionItemClass, 'nav-link')}
-        actionItemIconClass={classNames(actionItemIconClass, 'icon-inline')}
-    />
-)
+}) => {
+    console.log('rendering web actions nav items')
+    return (
+        <ActionsNavItems
+            {...props}
+            listClass={classNames(listClass, 'nav')}
+            listItemClass={classNames(listItemClass, 'nav-item')}
+            actionItemClass={classNames(actionItemClass, 'nav-link')}
+            actionItemIconClass={classNames(actionItemIconClass, 'icon-inline')}
+        />
+    )
+}
 WebActionsNavItems.displayName = 'WebActionsNavItems'
 
 const completionWidgetListItemClassName = 'completion-widget-dropdown__item d-flex align-items-center p-2'

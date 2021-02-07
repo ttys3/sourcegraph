@@ -37,6 +37,7 @@ import { BreadcrumbSetters } from '../components/Breadcrumbs'
 import { AuthenticatedUser } from '../auth'
 import { TelemetryProps } from '../../../shared/src/telemetry/telemetryService'
 import { RepositoryFields } from '../graphql-operations'
+import { ActionItemsBarProps } from '../extensions/components/ActionItemsBar'
 
 /** Props passed to sub-routes of {@link RepoRevisionContainer}. */
 export interface RepoRevisionContainerContext
@@ -54,7 +55,8 @@ export interface RepoRevisionContainerContext
         CopyQueryButtonProps,
         VersionContextProps,
         RevisionSpec,
-        BreadcrumbSetters {
+        BreadcrumbSetters,
+        ActionItemsBarProps {
     repo: RepositoryFields
     resolvedRev: ResolvedRevision
 
@@ -82,7 +84,8 @@ interface RepoRevisionContainerProps
         CopyQueryButtonProps,
         VersionContextProps,
         RevisionSpec,
-        BreadcrumbSetters {
+        BreadcrumbSetters,
+        ActionItemsBarProps {
     routes: readonly RepoRevisionContainerRoute[]
     repoSettingsAreaRoutes: readonly RepoSettingsAreaRoute[]
     repoSettingsSidebarGroups: readonly RepoSettingsSideBarGroup[]

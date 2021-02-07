@@ -58,6 +58,7 @@ import { IS_CHROME } from '../marketing/util'
 import { useLocalStorage } from '../util/useLocalStorage'
 import { Settings } from '../schema/settings.schema'
 import SourceRepositoryIcon from 'mdi-react/SourceRepositoryIcon'
+import { useWebActionItems } from '../extensions/components/ActionItemsBar'
 
 /**
  * Props passed to sub-routes of {@link RepoContainer}.
@@ -270,6 +271,8 @@ export const RepoContainer: React.FunctionComponent<RepoContainerProps> = props 
         })
     }, [revision, filePath, repoName, onNavbarQueryChange, globbing])
 
+    const { useActionItemsBar, useActionItemsToggle } = useWebActionItems()
+
     const isBrowserExtensionInstalled = useObservable(browserExtensionInstalled)
     const codeHostIntegrationMessaging =
         (!isErrorLike(props.settingsCascade.final) &&
@@ -365,6 +368,7 @@ export const RepoContainer: React.FunctionComponent<RepoContainerProps> = props 
             <RepoHeader
                 {...props}
                 actionButtons={props.repoHeaderActionButtons}
+                useActionItemsToggle={useActionItemsToggle}
                 revision={revision}
                 repo={repoOrError}
                 resolvedRev={resolvedRevisionOrError}
@@ -416,6 +420,7 @@ export const RepoContainer: React.FunctionComponent<RepoContainerProps> = props 
                                     resolvedRevisionOrError={resolvedRevisionOrError}
                                     // must exactly match how the revision was encoded in the URL
                                     routePrefix={`${repoMatchURL}${rawRevision ? `@${rawRevision}` : ''}`}
+                                    useActionItemsBar={useActionItemsBar}
                                 />
                             )}
                         />
