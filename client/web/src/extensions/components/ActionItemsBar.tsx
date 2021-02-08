@@ -5,10 +5,20 @@ import PuzzleOutlineIcon from 'mdi-react/PuzzleOutlineIcon'
 import ChevronDoubleUpIcon from 'mdi-react/ChevronDoubleUpIcon'
 import { ButtonLink } from '../../../../shared/src/components/LinkOrButton'
 import classNames from 'classnames'
+import { ActionsContainer } from '../../../../shared/src/actions/ActionsContainer'
+import { ContributableMenu } from '../../../../shared/src/api/protocol'
+import { ExtensionsControllerProps } from '../../../../shared/src/extensions/controller'
+import * as H from 'history'
+import { PlatformContextProps } from '../../../../shared/src/platform/context'
+import { TelemetryProps } from '../../../../shared/src/telemetry/telemetryService'
+import { ActionItem } from '../../../../shared/src/actions/ActionItem'
+import PlusIcon from 'mdi-react/PlusIcon'
+import { Link } from 'react-router-dom'
 
 // Action items bar and toggle are two separate components due to their placement in the DOM tree
 
-export function useWebActionItems(): ActionItemsBarProps & ActionItemsToggleProps {
+export function useWebActionItems(): Pick<ActionItemsBarProps, 'useActionItemsBar'> &
+    Pick<ActionItemsToggleProps, 'useActionItemsToggle'> {
     // Need to pass in contribution point, template type. pass in default open state (we want to keep it closed on search pages by default?)
     // Should toggle state depend on context? or should all action items bars share state for consistency during navigation?
     // use template type dependent on menu/context
@@ -39,8 +49,9 @@ export function useWebActionItems(): ActionItemsBarProps & ActionItemsToggleProp
     }
 }
 
-export interface ActionItemsBarProps {
+export interface ActionItemsBarProps extends ExtensionsControllerProps, PlatformContextProps, TelemetryProps {
     useActionItemsBar: () => { isOpen: boolean | undefined }
+    location: H.Location
 }
 
 export interface ActionItemsToggleProps {
@@ -51,25 +62,55 @@ export interface ActionItemsToggleProps {
     className?: string
 }
 
-export const ActionItemsBar: React.FunctionComponent<ActionItemsBarProps> = ({ useActionItemsBar }) => {
-    const { isOpen } = useActionItemsBar()
-
-    // Only fetch actions if bar is open. check if observable is memoized
+/**
+ *
+ */
+export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
+    const { isOpen } = props.useActionItemsBar()
 
     if (!isOpen) {
         return null
     }
 
-    // TODO(tj): flex
     return (
-        <div className="action-items__bar border-left position-relative">
+        <div className="action-items__bar p-0 border-left position-relative">
             <ActionItemsDivider />
-            <p>a</p>
-            <p>b</p>
+            <ActionsContainer
+                menu={ContributableMenu.EditorTitle}
+                extensionsController={props.extensionsController}
+                empty={<p>No extensions</p>}
+                location={props.location}
+                platformContext={props.platformContext}
+                telemetryService={props.telemetryService}
+            >
+                {items => (
+                    <ul className="list-unstyled m-0">
+                        {items.map(item => (
+                            <li key={item.action.id} className="action-items__list-item">
+                                <ActionItem
+                                    {...props}
+                                    {...item}
+                                    className="action-items__action  d-block"
+                                    variant="actionItem"
+                                    iconClassName="icon-inline"
+                                    pressedClassName="action-items__action--pressed"
+                                />
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </ActionsContainer>
             <ActionItemsDivider />
+            <Link
+                to="/extensions"
+                className="nav-link action-items__action action-items__list-item"
+                data-tooltip="Add extensions"
+            >
+                <PlusIcon className="icon-inline" />
+            </Link>
         </div>
     )
-}
+})
 
 export const ActionItemsToggle: React.FunctionComponent<ActionItemsToggleProps> = ({
     useActionItemsToggle,
@@ -97,5 +138,5 @@ export const ActionItemsToggle: React.FunctionComponent<ActionItemsToggleProps> 
 }
 
 const ActionItemsDivider: React.FunctionComponent<{ className?: string }> = ({ className }) => (
-    <div className={classNames(className, 'action-items__divider position-absolute rounded-sm d-flex')} />
+    <li className={classNames(className, 'action-items__divider position-absolute rounded-sm d-flex')} />
 )

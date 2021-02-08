@@ -171,7 +171,13 @@ export const repoRevisionContainerRoutes: readonly RepoRevisionContainerRoute[] 
                             )}
                         </div>
                     )}
-                    <ActionItemsBar useActionItemsBar={context.useActionItemsBar} />
+                    <ActionItemsBar
+                        useActionItemsBar={context.useActionItemsBar}
+                        location={context.location}
+                        extensionsController={context.extensionsController}
+                        platformContext={context.platformContext}
+                        telemetryService={context.telemetryService}
+                    />
                 </>
             )
         },

@@ -8,6 +8,7 @@ import { getContributedActionItems } from '../contributions/contributions'
 import { ExtensionsControllerProps } from '../extensions/controller'
 import { PlatformContextProps } from '../platform/context'
 import { TelemetryProps } from '../telemetry/telemetryService'
+import { useObservable } from '../util/useObservable'
 import { ActionItem, ActionItemAction } from './ActionItem'
 import { ActionsState } from './actions'
 
@@ -25,7 +26,7 @@ interface Props extends ActionsProps, TelemetryProps {
      * Called with the array of contributed items to produce the rendered component. If not set, uses a default
      * render function that renders a <ActionItem> for each item.
      */
-    render?: (items: ActionItemAction[]) => JSX.Element | null
+    children?: (items: ActionItemAction[]) => JSX.Element | null
 
     /**
      * If set, it is rendered when there are no contributed items for this menu. Use null to render nothing when
@@ -34,62 +35,34 @@ interface Props extends ActionsProps, TelemetryProps {
     empty?: JSX.Element | null
 }
 
-// TODO(tj): refactor this with hook that will be shared with action items bar. will fix the tree page actions bug/
-
 /** Displays the actions in a container, with a wrapper and/or empty element. */
-export class ActionsContainer extends React.PureComponent<Props, ActionsState> {
-    public state: ActionsState = {}
-
-    private scopeChanges = new Subject<ContributionScope | undefined>()
-    private extraContextChanges = new Subject<Context | undefined>()
-    private subscriptions = new Subscription()
-
-    public componentDidMount(): void {
-        this.subscriptions.add(
-            combineLatest([this.scopeChanges, this.extraContextChanges])
-                .pipe(
-                    switchMap(([scope, extraContext]) =>
-                        // TODO(tj): pass a custom contribution filter, or option to return contributions where "when" === false
-                        this.props.extensionsController.services.contribution.getContributions(scope, extraContext)
-                    )
-                )
-                .subscribe(contributions => this.setState({ contributions }))
-        )
-        this.scopeChanges.next(this.props.scope)
-    }
-
-    public componentDidUpdate(previousProps: Props): void {
-        if (previousProps.scope !== this.props.scope) {
-            this.scopeChanges.next(this.props.scope)
-        }
-        if (previousProps.extraContext !== this.props.extraContext) {
-            this.extraContextChanges.next(this.props.extraContext)
-        }
-    }
-
-    public componentWillUnmount(): void {
-        this.subscriptions.unsubscribe()
-    }
-
-    public render(): JSX.Element | null {
-        if (!this.state.contributions) {
-            return null // loading
-        }
-
-        const items = getContributedActionItems(this.state.contributions, this.props.menu)
-        if (this.props.empty !== undefined && items.length === 0) {
-            return this.props.empty
-        }
-
-        const render = this.props.render || this.defaultRenderItems
-        return render(items)
-    }
-
-    private defaultRenderItems = (items: ActionItemAction[]): JSX.Element | null => (
-        <>
-            {items.map((item, index) => (
-                <ActionItem {...this.props} key={index} {...item} />
-            ))}
-        </>
+export const ActionsContainer: React.FunctionComponent<Props> = ({ scope, extraContext, ...props }) => {
+    const contributions = useObservable(
+        React.useMemo(() => props.extensionsController.services.contribution.getContributions(scope, extraContext), [
+            props.extensionsController,
+            scope,
+            extraContext,
+        ])
     )
+    console.log({ contributions })
+
+    if (!contributions) {
+        return null // loading
+    }
+
+    const items = getContributedActionItems(contributions, props.menu)
+    if (props.empty !== undefined && items.length === 0) {
+        return props.empty
+    }
+
+    const render = props.children || defaultRenderItems
+    return render(items, props)
 }
+
+const defaultRenderItems = (items: ActionItemAction[], props: Props): JSX.Element | null => (
+    <>
+        {items.map(item => (
+            <ActionItem {...props} key={item.action.id} {...item} />
+        ))}
+    </>
+)
