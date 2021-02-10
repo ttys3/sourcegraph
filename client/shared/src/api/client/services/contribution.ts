@@ -29,6 +29,12 @@ export interface ContributionUnsubscribable extends Unsubscribable {
     entry: ContributionsEntry
 }
 
+export interface ContributionOptions<T = never> {
+    scope?: ContributionScope | undefined
+    extraContext?: Context<T>
+    returnInactiveMenuItems?: boolean
+}
+
 /** Manages and executes contributions from all extensions. */
 export class ContributionRegistry {
     /** All entries, including entries that are not enabled in the current context. */
@@ -86,11 +92,8 @@ export class ContributionRegistry {
      * in this object shadow (take precedence over) properties in the global context for this
      * computation.
      */
-    public getContributions<T>(
-        scope?: ContributionScope | undefined,
-        extraContext?: Context<T>
-    ): Observable<Evaluated<Contributions>> {
-        return this.getContributionsFromEntries<T>(this._entries, scope, extraContext)
+    public getContributions<T>(options: ContributionOptions<T> = {}): Observable<Evaluated<Contributions>> {
+        return this.getContributionsFromEntries<T>(this._entries, options)
     }
 
     /**
@@ -99,8 +102,7 @@ export class ContributionRegistry {
      */
     protected getContributionsFromEntries<T>(
         entries: Observable<ContributionsEntry[]>,
-        scope: ContributionScope | undefined,
-        extraContext?: Context<T>,
+        { extraContext, scope, returnInactiveMenuItems }: ContributionOptions<T>,
         logWarning = (...args: any[]) => console.log(...args)
     ): Observable<Evaluated<Contributions>> {
         return combineLatest([
@@ -146,7 +148,10 @@ export class ContributionRegistry {
 
                 return multiContributions.flat().map(contributions => {
                     try {
-                        return filterContributions(evaluateContributions<T>(computedContext, contributions))
+                        const evaluatedContributions = evaluateContributions<T>(computedContext, contributions)
+                        return returnInactiveMenuItems
+                            ? evaluatedContributions
+                            : filterContributions(evaluatedContributions)
                     } catch (error) {
                         // An error during evaluation causes all of the contributions in the same entry to be
                         // discarded.
@@ -261,7 +266,6 @@ export function filterContributions(contributions: Evaluated<Contributions>): Ev
     }
     return {
         ...contributions,
-        // menus: mapValues(contributions.menus, menuItems => menuItems?.filter(menuItem => menuItem)),
         menus: mapValues(contributions.menus, menuItems => menuItems?.filter(menuItem => menuItem.when !== false)),
     }
 }

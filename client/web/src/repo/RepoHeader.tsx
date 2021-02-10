@@ -254,10 +254,7 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                 ))}
             </ul>
             <ul className="navbar-nav">
-                <ActionItemsToggle
-                    className="repo-header__action-list-item"
-                    useActionItemsToggle={props.useActionItemsToggle}
-                />
+                <ActionItemsToggle useActionItemsToggle={props.useActionItemsToggle} />
             </ul>
         </nav>
     )

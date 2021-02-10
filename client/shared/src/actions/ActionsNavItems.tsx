@@ -62,7 +62,7 @@ export class ActionsNavItems extends React.PureComponent<ActionsNavItemsProps, A
             combineLatest([this.scopeChanges, this.extraContextChanges])
                 .pipe(
                     switchMap(([scope, extraContext]) =>
-                        this.props.extensionsController.services.contribution.getContributions(scope, extraContext)
+                        this.props.extensionsController.services.contribution.getContributions({ scope, extraContext })
                     )
                 )
                 .subscribe(contributions => this.setState({ contributions }))

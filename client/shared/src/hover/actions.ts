@@ -60,7 +60,7 @@ export function getHoverActions(
     ).pipe(
         switchMap(context =>
             extensionsController.services.contribution
-                .getContributions(undefined, context)
+                .getContributions({ extraContext: context })
                 .pipe(map(contributions => getContributedActionItems(contributions, ContributableMenu.Hover)))
         )
     )

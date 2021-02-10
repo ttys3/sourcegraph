@@ -1,8 +1,9 @@
-$action-items-bar-width: 2.5625rem;
+$action-item-width: 2.5rem;
+$action-item-container-width: calc($action-item-width + 0.0625rem);
 
 .action-items {
     &__bar {
-        width: $action-items-bar-width;
+        width: $action-item-container-width;
         background-color: var(--color-bg-2);
         list-style: none;
     }
@@ -19,10 +20,18 @@ $action-items-bar-width: 2.5625rem;
         &--open {
             border-bottom: solid var(--color-bg-2) 1px;
             margin-bottom: -0.0625rem;
+        }
+    }
 
-            &:hover {
-                border-color: var(--border-color);
-            }
+    &__toggle-container {
+        width: $action-item-container-width;
+        background-color: var(--color-bg-2);
+        padding-top: 0.125rem;
+        padding-bottom: 0.125rem;
+
+        &--open {
+            border-bottom: solid var(--color-bg-2) 1px;
+            margin-bottom: -0.0625rem;
         }
     }
 
@@ -50,7 +59,7 @@ $action-items-bar-width: 2.5625rem;
 
     &__action {
         padding: 0.375rem 0 0.375rem 0.625rem;
-        width: $action-items-bar-width;
+        width: $action-item-width;
 
         &:hover {
             background-color: var(--link-hover-background-color);
@@ -59,6 +68,12 @@ $action-items-bar-width: 2.5625rem;
         &--pressed {
             color: var(--body-color);
             background-color: var(--link-hover-background-color);
+        }
+
+        &--inactive {
+            pointer-events: none;
+            cursor: not-allowed;
+            filter: saturate(0%);
         }
     }
 }

@@ -585,7 +585,7 @@ describe('registerHoverContributions()', () => {
 
     const getHoverActions = (context: HoverActionsContext): Promise<ActionItemAction[]> =>
         contribution
-            .getContributions(undefined, context)
+            .getContributions({ extraContext: context })
             .pipe(
                 first(),
                 map(contributions => getContributedActionItems(contributions, ContributableMenu.Hover))
@@ -604,6 +604,7 @@ describe('registerHoverContributions()', () => {
                 description: undefined,
                 iconURL: undefined,
             },
+            active: true,
             altAction: undefined,
         }
         const GO_TO_DEFINITION_PRELOADED_ACTION: ActionItemAction = {
@@ -613,6 +614,7 @@ describe('registerHoverContributions()', () => {
                 id: 'goToDefinition.preloaded',
                 title: 'Go to definition',
             },
+            active: true,
             altAction: undefined,
         }
         const FIND_REFERENCES_ACTION: ActionItemAction = {
@@ -622,6 +624,7 @@ describe('registerHoverContributions()', () => {
                 id: 'findReferences',
                 title: 'Find references',
             },
+            active: true,
             altAction: undefined,
         }
 

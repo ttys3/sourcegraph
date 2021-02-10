@@ -77,6 +77,7 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
             <ActionItemsDivider />
             <ActionsContainer
                 menu={ContributableMenu.EditorTitle}
+                returnInactiveMenuItems={true}
                 extensionsController={props.extensionsController}
                 empty={<p>No extensions</p>}
                 location={props.location}
@@ -90,10 +91,12 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                                 <ActionItem
                                     {...props}
                                     {...item}
-                                    className="action-items__action  d-block"
+                                    className="action-items__action d-block"
                                     variant="actionItem"
                                     iconClassName="icon-inline"
                                     pressedClassName="action-items__action--pressed"
+                                    inactiveClassName="action-items__action--inactive"
+                                    hideLabel={true}
                                 />
                             </li>
                         ))}
@@ -101,13 +104,17 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                 )}
             </ActionsContainer>
             <ActionItemsDivider />
-            <Link
-                to="/extensions"
-                className="nav-link action-items__action action-items__list-item"
-                data-tooltip="Add extensions"
-            >
-                <PlusIcon className="icon-inline" />
-            </Link>
+            <ul className="list-unstyled m-0">
+                <li className="action-items__list-item">
+                    <Link
+                        to="/extensions"
+                        className="nav-link action-items__action action-items__list-item"
+                        data-tooltip="Add extensions"
+                    >
+                        <PlusIcon className="icon-inline" />
+                    </Link>
+                </li>
+            </ul>
         </div>
     )
 })
@@ -121,22 +128,26 @@ export const ActionItemsToggle: React.FunctionComponent<ActionItemsToggleProps> 
     return (
         <li
             data-tooltip={`${isOpen ? 'Close' : 'Open'} extensions panel`}
-            className={classNames(className, 'nav-item border-left position-relative d-flex align-items-center')}
+            className={classNames(className, 'nav-item border-left')}
         >
-            <ButtonLink
-                className={classNames('py-2 action-items__toggle', isOpen && 'action-items__toggle--open')}
-                onSelect={toggle}
-            >
-                {isOpen ? (
-                    <ChevronDoubleUpIcon className="icon-inline" />
-                ) : (
-                    <PuzzleOutlineIcon className="icon-inline" />
+            <div
+                className={classNames(
+                    'action-items__toggle-container',
+                    isOpen && 'action-items__toggle-container--open'
                 )}
-            </ButtonLink>
+            >
+                <ButtonLink className={classNames('action-items__action d-block ')} onSelect={toggle}>
+                    {isOpen ? (
+                        <ChevronDoubleUpIcon className="icon-inline" />
+                    ) : (
+                        <PuzzleOutlineIcon className="icon-inline" />
+                    )}
+                </ButtonLink>
+            </div>
         </li>
     )
 }
 
 const ActionItemsDivider: React.FunctionComponent<{ className?: string }> = ({ className }) => (
-    <li className={classNames(className, 'action-items__divider position-absolute rounded-sm d-flex')} />
+    <li className={classNames(className, 'action-items__divider position-relative rounded-sm d-flex')} />
 )

@@ -1,8 +1,7 @@
 import * as H from 'history'
 import * as React from 'react'
-import { Subject, Subscription, combineLatest } from 'rxjs'
-import { switchMap } from 'rxjs/operators'
 import { ContributionScope, Context } from '../api/client/context/context'
+import { ContributionOptions } from '../api/client/services/contribution'
 import { ContributableMenu } from '../api/protocol'
 import { getContributedActionItems } from '../contributions/contributions'
 import { ExtensionsControllerProps } from '../extensions/controller'
@@ -10,7 +9,6 @@ import { PlatformContextProps } from '../platform/context'
 import { TelemetryProps } from '../telemetry/telemetryService'
 import { useObservable } from '../util/useObservable'
 import { ActionItem, ActionItemAction } from './ActionItem'
-import { ActionsState } from './actions'
 
 export interface ActionsProps
     extends ExtensionsControllerProps<'executeCommand' | 'services'>,
@@ -21,7 +19,7 @@ export interface ActionsProps
     listClass?: string
     location: H.Location
 }
-interface Props extends ActionsProps, TelemetryProps {
+interface Props extends ActionsProps, TelemetryProps, ContributionOptions {
     /**
      * Called with the array of contributed items to produce the rendered component. If not set, uses a default
      * render function that renders a <ActionItem> for each item.
@@ -36,13 +34,22 @@ interface Props extends ActionsProps, TelemetryProps {
 }
 
 /** Displays the actions in a container, with a wrapper and/or empty element. */
-export const ActionsContainer: React.FunctionComponent<Props> = ({ scope, extraContext, ...props }) => {
+export const ActionsContainer: React.FunctionComponent<Props> = ({
+    scope,
+    extraContext,
+    returnInactiveMenuItems,
+    ...props
+}) => {
     const contributions = useObservable(
-        React.useMemo(() => props.extensionsController.services.contribution.getContributions(scope, extraContext), [
-            props.extensionsController,
-            scope,
-            extraContext,
-        ])
+        React.useMemo(
+            () =>
+                props.extensionsController.services.contribution.getContributions({
+                    scope,
+                    extraContext,
+                    returnInactiveMenuItems,
+                }),
+            [props.extensionsController, scope, extraContext, returnInactiveMenuItems]
+        )
     )
     console.log({ contributions })
 
