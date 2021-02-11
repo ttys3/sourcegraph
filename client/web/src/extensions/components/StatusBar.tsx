@@ -5,6 +5,7 @@ import { useObservable } from '../../../../shared/src/util/useObservable'
 import classNames from 'classnames'
 import { TextDocumentIdentifier } from '../../../../shared/src/api/client/types/textDocument'
 import { Observable } from 'rxjs'
+import { useCarousel } from '../../components/useCarousel'
 
 interface StatusBarProps extends Omit<AbsoluteRepoFile, 'revision'> {
     getStatusBarItems: (parameters: TextDocumentIdentifier) => Observable<StatusBarItemWithKey[] | null>
@@ -26,11 +27,15 @@ export const StatusBar: React.FunctionComponent<StatusBarProps> = ({
         )
     )
 
+    const carouselState = useCarousel({ direction: 'leftToRight' })
+    console.log({ carouselState })
+    window.carouselState = carouselState
+
     // TODO(tj): Wait 5 seconds to show "no information from extensions avaiable"
     // to avoid UI jitter during initial extension activation
 
     return (
-        <div className="status-bar w-100 border-top px-2 d-flex">
+        <div className="status-bar w-100 border-top px-2 d-flex" ref={carouselState.carouselReference}>
             {statusBarItems ? (
                 statusBarItems.map(statusBarItem => (
                     <StatusBarItem key={statusBarItem.key} statusBarItem={statusBarItem} />

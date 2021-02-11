@@ -284,6 +284,9 @@ function createExtensionAPI(
                 { key: 'fake' },
                 { text: '2 code owners', tooltip: 'Code owners: @felixbecker, @beyang' }
             )
+            for (let i = 0; i < 25; i++) {
+                viewComponent.setStatusBarItem({ key: `fake-${i}` }, { text: `fake-${i}` })
+            }
         }
     })
 
