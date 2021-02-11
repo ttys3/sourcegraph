@@ -14,6 +14,11 @@ import { TelemetryProps } from '../../../../shared/src/telemetry/telemetryServic
 import { ActionItem } from '../../../../shared/src/actions/ActionItem'
 import PlusIcon from 'mdi-react/PlusIcon'
 import { Link } from 'react-router-dom'
+import { merge, combineLatest, EMPTY, fromEvent, ReplaySubject } from 'rxjs'
+import { filter, mapTo, switchMap, tap } from 'rxjs/operators'
+import { Key } from 'ts-key-enum'
+import { tabbable } from 'tabbable'
+import { head, last } from 'lodash'
 
 // Action items bar and toggle are two separate components due to their placement in the DOM tree
 
@@ -24,13 +29,71 @@ export function useWebActionItems(): Pick<ActionItemsBarProps, 'useActionItemsBa
     // use template type dependent on menu/context
     const toggles = useMemo(() => new LocalStorageSubject('action-items-bar-expanded', true), [])
 
+    const toggleReferences = useMemo(() => new ReplaySubject<HTMLElement>(1), [])
+    const nextToggleReference = useCallback((toggle: HTMLElement) => toggleReferences.next(toggle), [toggleReferences])
+
+    const barReferences = useMemo(() => new ReplaySubject<HTMLElement>(1), [])
+    const nextBarReference = useCallback((bar: HTMLElement) => barReferences.next(bar), [barReferences])
+
+    // Set up keyboard navigation for distant toggle and bar. Removes previous event
+    // listeners whenever references change.
+    useObservable(
+        useMemo(
+            () =>
+                combineLatest([barReferences, toggleReferences]).pipe(
+                    switchMap(([bar, toggle]) => {
+                        if (toggle && bar) {
+                            const toggleTabs = fromEvent<React.KeyboardEvent>(toggle, 'keydown').pipe(
+                                filter(event => event.key === Key.Tab && !event.shiftKey),
+                                tap(event => {
+                                    const firstBarTabbable = head(tabbable(bar))
+                                    if (firstBarTabbable) {
+                                        firstBarTabbable.focus()
+                                        event.preventDefault()
+                                    }
+                                })
+                            )
+
+                            const barTabs = fromEvent<React.KeyboardEvent>(bar, 'keydown').pipe(
+                                filter(event => event.key === Key.Tab),
+                                filter(event =>
+                                    event.shiftKey ? isFirstTabbable(event.target) : isLastTabbable(event.target)
+                                ),
+                                tap(event => {
+                                    toggle.focus()
+                                    event.preventDefault()
+                                })
+                            )
+
+                            function isLastTabbable(eventTarget: EventTarget): boolean {
+                                return eventTarget === last(tabbable(bar))
+                            }
+
+                            function isFirstTabbable(eventTarget: EventTarget): boolean {
+                                return eventTarget === head(tabbable(bar))
+                            }
+
+                            return merge(toggleTabs, barTabs).pipe(
+                                // We don't want to rerender the subtree on keydown events
+                                mapTo(undefined)
+                            )
+                        } else {
+                            // Action items bar is not open, don't add event listeners
+                            return EMPTY
+                        }
+                    })
+                ),
+            []
+        )
+    )
+
     const useActionItemsBar = useCallback(() => {
         // `useActionItemsBar` will be used as a hook
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const isOpen = useObservable(toggles)
 
-        return { isOpen }
-    }, [toggles])
+        return { isOpen, barReference: nextBarReference }
+    }, [toggles, nextBarReference])
 
     const useActionItemsToggle = useCallback(() => {
         // `useActionItemsToggle` will be used as a hook
@@ -40,8 +103,8 @@ export function useWebActionItems(): Pick<ActionItemsBarProps, 'useActionItemsBa
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const toggle = useCallback(() => toggles.next(!isOpen), [isOpen])
 
-        return { isOpen, toggle }
-    }, [toggles])
+        return { isOpen, toggle, toggleReference: nextToggleReference }
+    }, [toggles, nextToggleReference])
 
     return {
         useActionItemsBar,
@@ -50,7 +113,7 @@ export function useWebActionItems(): Pick<ActionItemsBarProps, 'useActionItemsBa
 }
 
 export interface ActionItemsBarProps extends ExtensionsControllerProps, PlatformContextProps, TelemetryProps {
-    useActionItemsBar: () => { isOpen: boolean | undefined }
+    useActionItemsBar: () => { isOpen: boolean | undefined; barReference: React.RefCallback<HTMLElement> }
     location: H.Location
 }
 
@@ -58,6 +121,7 @@ export interface ActionItemsToggleProps {
     useActionItemsToggle: () => {
         isOpen: boolean | undefined
         toggle: () => void
+        toggleReference: React.RefCallback<HTMLElement>
     }
     className?: string
 }
@@ -66,14 +130,14 @@ export interface ActionItemsToggleProps {
  *
  */
 export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
-    const { isOpen } = props.useActionItemsBar()
+    const { isOpen, barReference } = props.useActionItemsBar()
 
     if (!isOpen) {
         return null
     }
 
     return (
-        <div className="action-items__bar p-0 border-left position-relative">
+        <div className="action-items__bar p-0 border-left position-relative" ref={barReference}>
             <ActionItemsDivider />
             <ActionsContainer
                 menu={ContributableMenu.EditorTitle}
@@ -123,7 +187,7 @@ export const ActionItemsToggle: React.FunctionComponent<ActionItemsToggleProps> 
     useActionItemsToggle,
     className,
 }) => {
-    const { isOpen, toggle } = useActionItemsToggle()
+    const { isOpen, toggle, toggleReference } = useActionItemsToggle()
 
     return (
         <li
@@ -136,7 +200,11 @@ export const ActionItemsToggle: React.FunctionComponent<ActionItemsToggleProps> 
                     isOpen && 'action-items__toggle-container--open'
                 )}
             >
-                <ButtonLink className={classNames('action-items__action d-block ')} onSelect={toggle}>
+                <ButtonLink
+                    className={classNames('action-items__action d-block ')}
+                    onSelect={toggle}
+                    buttonLinkRef={toggleReference}
+                >
                     {isOpen ? (
                         <ChevronDoubleUpIcon className="icon-inline" />
                     ) : (

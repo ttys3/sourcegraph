@@ -38,6 +38,8 @@ interface Props extends Pick<AnchorHTMLAttributes<never>, 'target' | 'rel'> {
     disabledClassName?: string
 
     id?: string
+
+    buttonLinkRef?: React.Ref<HTMLAnchorElement>
 }
 
 /**
@@ -58,6 +60,7 @@ export const ButtonLink: React.FunctionComponent<Props> = ({
     onSelect = noop,
     children,
     id,
+    buttonLinkRef = null,
 }) => {
     // We need to set up a keypress listener because <a onclick> doesn't get
     // triggered by enter.
@@ -103,14 +106,20 @@ export const ButtonLink: React.FunctionComponent<Props> = ({
         return (
             // Need empty href for styling reasons
             // Use onAuxClick so that middle-clicks are caught.
-            <a href="" {...commonProps} onClick={onClickPreventDefault} onAuxClick={onClickPreventDefault}>
+            <a
+                href=""
+                {...commonProps}
+                onClick={onClickPreventDefault}
+                onAuxClick={onClickPreventDefault}
+                ref={buttonLinkRef}
+            >
                 {children}
             </a>
         )
     }
 
     return (
-        <Link {...commonProps} to={to} target={target} rel={rel}>
+        <Link {...commonProps} to={to} target={target} rel={rel} ref={buttonLinkRef}>
             {children}
         </Link>
     )

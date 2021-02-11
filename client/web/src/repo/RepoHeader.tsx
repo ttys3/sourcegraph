@@ -1,16 +1,13 @@
 import * as H from 'history'
 import React, { useState, useMemo, useEffect } from 'react'
-import { ContributableMenu } from '../../../shared/src/api/protocol'
 import { ButtonLink } from '../../../shared/src/components/LinkOrButton'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
 import * as GQL from '../../../shared/src/graphql/schema'
 import { PlatformContextProps } from '../../../shared/src/platform/context'
 import { ErrorLike } from '../../../shared/src/util/errors'
-import { WebActionsNavItems } from '../components/shared'
 import { ActionButtonDescriptor } from '../util/contributions'
 import { ResolvedRevision } from './backend'
 import { Breadcrumbs, BreadcrumbsProps } from '../components/Breadcrumbs'
-import { onlyDefaultExtensionsAdded } from '../../../shared/src/extensions/extensions'
 import { TelemetryProps } from '../../../shared/src/telemetry/telemetryService'
 import { SettingsCascadeOrError } from '../../../shared/src/settings/settings'
 import { AuthenticatedUser } from '../auth'
@@ -220,21 +217,6 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                 ))}
             </ul>
             <div className="repo-header__spacer" />
-            {determineShowAddExtensions(props) && (
-                <div className="d-none d-xl-flex align-items-center">
-                    <ButtonLink to="/extensions" className="btn btn-outline-secondary btn-sm mx-2 text-nowrap">
-                        Add extensions
-                    </ButtonLink>
-                </div>
-            )}
-            <ul className="navbar-nav test-action-items" data-menu={ContributableMenu.EditorTitle}>
-                <WebActionsNavItems
-                    {...props}
-                    listItemClass="repo-header__action-list-item"
-                    actionItemPressedClass="repo-header__action-item--pressed"
-                    menu={ContributableMenu.EditorTitle}
-                />
-            </ul>
             <ul className="navbar-nav">
                 {props.actionButtons.map(
                     ({ condition = () => true, label, tooltip, icon: Icon, to }) =>
@@ -258,19 +240,4 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
             </ul>
         </nav>
     )
-}
-
-/**
- * Determine whether to show the "add extensions" button. Display to all unautenticated users,
- * and only to authenticated users who have not added extensions.
- */
-function determineShowAddExtensions({
-    settingsCascade,
-    authenticatedUser,
-}: Pick<Props, 'settingsCascade' | 'authenticatedUser'>): boolean {
-    if (!authenticatedUser) {
-        return true
-    }
-
-    return onlyDefaultExtensionsAdded(settingsCascade)
 }
