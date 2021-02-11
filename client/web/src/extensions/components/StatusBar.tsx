@@ -6,6 +6,8 @@ import classNames from 'classnames'
 import { TextDocumentIdentifier } from '../../../../shared/src/api/client/types/textDocument'
 import { Observable } from 'rxjs'
 import { useCarousel } from '../../components/useCarousel'
+import MenuLeftIcon from 'mdi-react/MenuLeftIcon'
+import MenuRightIcon from 'mdi-react/MenuRightIcon'
 
 interface StatusBarProps extends Omit<AbsoluteRepoFile, 'revision'> {
     getStatusBarItems: (parameters: TextDocumentIdentifier) => Observable<StatusBarItemWithKey[] | null>
@@ -35,16 +37,36 @@ export const StatusBar: React.FunctionComponent<StatusBarProps> = ({
     // to avoid UI jitter during initial extension activation
 
     return (
-        <div className="status-bar w-100 border-top px-2 d-flex" ref={carouselState.carouselReference}>
-            {statusBarItems ? (
-                statusBarItems.map(statusBarItem => (
-                    <StatusBarItem key={statusBarItem.key} statusBarItem={statusBarItem} />
-                ))
-            ) : (
-                <StatusBarItem
-                    key="none-found"
-                    statusBarItem={{ key: 'none-found', text: 'No information from extensions available' }}
-                />
+        <div className="status-bar w-100 border-top px-2 d-flex">
+            {carouselState.canScrollNegative && (
+                <button
+                    type="button"
+                    className="btn btn-link status_bar__scroll"
+                    onClick={carouselState.onNegativeClicked}
+                >
+                    <MenuLeftIcon />
+                </button>
+            )}
+            <div className="status-bar__items d-flex" ref={carouselState.carouselReference}>
+                {statusBarItems ? (
+                    statusBarItems.map(statusBarItem => (
+                        <StatusBarItem key={statusBarItem.key} statusBarItem={statusBarItem} />
+                    ))
+                ) : (
+                    <StatusBarItem
+                        key="none-found"
+                        statusBarItem={{ key: 'none-found', text: 'No information from extensions available' }}
+                    />
+                )}
+            </div>
+            {carouselState.canScrollPositive && (
+                <button
+                    type="button"
+                    className="btn btn-link status-bar__scroll"
+                    onClick={carouselState.onPositiveClicked}
+                >
+                    <MenuRightIcon />
+                </button>
             )}
         </div>
     )

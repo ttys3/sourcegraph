@@ -1,6 +1,6 @@
 import { add, subtract } from 'lodash'
 import { useCallback, useMemo } from 'react'
-import { fromEvent, merge, of, ReplaySubject, Subject } from 'rxjs'
+import { BehaviorSubject, fromEvent, merge, of, ReplaySubject, Subject } from 'rxjs'
 import { map, switchMap, withLatestFrom, tap } from 'rxjs/operators'
 import { useObservable } from '../../../shared/src/util/useObservable'
 
@@ -71,13 +71,17 @@ export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions
                                 return of(defaultCarouselState)
                             }
 
+                            // Initial scroll state
+                            const initial = new BehaviorSubject(undefined)
                             const scrolls = fromEvent<React.UIEvent<HTMLElement>>(carousel, 'scroll')
                             const resizes = fromEvent<React.UIEvent<HTMLElement>>(window, 'resize')
 
-                            return merge(scrolls, resizes).pipe(map(() => carouselScrollHandlers[direction](carousel)))
+                            return merge(initial, scrolls, resizes).pipe(
+                                map(() => carouselScrollHandlers[direction](carousel))
+                            )
                         })
                     ),
-                [amountToScroll, carouselReferences]
+                [direction, carouselReferences]
             )
         ) || defaultCarouselState
 
@@ -94,7 +98,7 @@ export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions
                         }
                     })
                 ),
-            [amountToScroll, carouselReferences]
+            [amountToScroll, direction, clicks, carouselReferences]
         )
     )
 

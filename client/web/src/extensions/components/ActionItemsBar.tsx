@@ -77,13 +77,12 @@ export function useWebActionItems(): Pick<ActionItemsBarProps, 'useActionItemsBa
                                 // We don't want to rerender the subtree on keydown events
                                 mapTo(undefined)
                             )
-                        } else {
-                            // Action items bar is not open, don't add event listeners
-                            return EMPTY
                         }
+                        // Action items bar is not open, don't add event listeners
+                        return EMPTY
                     })
                 ),
-            []
+            [barReferences, toggleReferences]
         )
     )
 
