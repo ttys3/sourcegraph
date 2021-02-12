@@ -174,17 +174,15 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                         {[
                             ...items,
                             // Temporary: testing default icons
-                            ...Array(20)
-                                .fill(null)
-                                .map<ActionItemAction>((_value, index) => ({
-                                    active: true,
-                                    action: {
-                                        category: String(index).slice(-1),
-                                        command: 'open',
-                                        actionItem: {},
-                                        id: `fake-${index}`,
-                                    },
-                                })),
+                            ...new Array(20).fill(null).map<ActionItemAction>((_value, index) => ({
+                                active: true,
+                                action: {
+                                    category: String(index).slice(-1),
+                                    command: 'open',
+                                    actionItem: {},
+                                    id: `fake-${index}`,
+                                },
+                            })),
                         ].map((item, index) => (
                             <li key={item.action.id} className="action-items__list-item">
                                 <ActionItem

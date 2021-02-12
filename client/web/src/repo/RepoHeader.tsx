@@ -224,8 +224,8 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                 ))}
             </ul>
             <div className="repo-header__spacer" />
-            <ul className="navbar-nav">
-                {/* {props.actionButtons.map(
+            <ul className="navbar-nav d-none d-lg-flex">
+                {props.actionButtons.map(
                     ({ condition = () => true, label, tooltip, icon: Icon, to }) =>
                         condition(context) && (
                             <li className="nav-item repo-header__action-list-item" key={label}>
@@ -240,7 +240,9 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                     <li className="nav-item repo-header__action-list-item" key={a.element.key || index}>
                         {a.element}
                     </li>
-                ))} */}
+                ))}
+            </ul>
+            <ul className="navbar-nav">
                 <li className="nav-item d-lg-none">
                     <ButtonDropdown
                         className="menu-nav-item"
