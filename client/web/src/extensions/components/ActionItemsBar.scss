@@ -16,7 +16,7 @@ $default-icon-colors: $oc-grape-7, $oc-violet-7, $oc-cyan-9, $oc-indigo-7, $oc-p
         padding-right: 0.625rem;
 
         &:hover {
-            background-color: var(--link-hover-background-color);
+            background-color: var(--link-hover-bg-color);
         }
 
         &--open {
@@ -73,15 +73,15 @@ $default-icon-colors: $oc-grape-7, $oc-violet-7, $oc-cyan-9, $oc-indigo-7, $oc-p
         height: 2rem;
 
         &:hover {
-            background-color: var(--link-hover-background-color);
+            background-color: var(--link-hover-bg-color);
         }
 
         &--pressed {
             color: var(--body-color);
-            background-color: var(--border-color);
+            background-color: var(--link-hover-bg-color-2);
 
             &:hover {
-                background-color: var(--border-color);
+                background-color: var(--link-hover-bg-color-2);
             }
         }
 
@@ -127,7 +127,7 @@ $default-icon-colors: $oc-grape-7, $oc-violet-7, $oc-cyan-9, $oc-indigo-7, $oc-p
         width: $action-item-width;
 
         &:hover {
-            background-color: var(--link-hover-background-color);
+            background-color: var(--link-hover-bg-color);
         }
     }
 }

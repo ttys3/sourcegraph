@@ -128,7 +128,7 @@ export interface ActionItemsToggleProps {
     className?: string
 }
 
-const actionItemClassName = 'action-items__action d-flex justify-content-center align-items-center'
+const actionItemClassName = 'action-items__action d-flex justify-content-center align-items-center text-decoration-none'
 
 /**
  *
@@ -173,7 +173,7 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                     <ul className="action-items__list list-unstyled m-0" ref={carouselReference}>
                         {[
                             ...items,
-                            // Temporary: testing default icons
+                            // TODO(tj): Temporary: testing default icons
                             ...new Array(20).fill(null).map<ActionItemAction>((_value, index) => ({
                                 active: true,
                                 action: {
