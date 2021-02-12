@@ -16,6 +16,7 @@ import { Scalars } from '../../../shared/src/graphql-operations'
 import { ActionItemsToggle, ActionItemsToggleProps } from '../extensions/components/ActionItemsBar'
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import DotsVerticalIcon from 'mdi-react/DotsVerticalIcon'
+import { useBreakpoint } from '../util/dom'
 
 /**
  * Stores the list of RepoHeaderContributions, manages addition/deletion, and ensures they are sorted.
@@ -202,6 +203,30 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
     const leftActions = repoHeaderContributions.filter(({ position }) => position === 'left')
     const rightActions = repoHeaderContributions.filter(({ position }) => position === 'right')
 
+    const isLarge = useBreakpoint('lg')
+
+    const renderedRightActions = (
+        <>
+            {/* TODO: actionButtons seem to be useless, remove? */}
+            {props.actionButtons.map(
+                ({ condition = () => true, label, tooltip, icon: Icon, to }) =>
+                    condition(context) && (
+                        <li className="nav-item repo-header__action-list-item" key={label}>
+                            <ButtonLink to={to(context)} data-tooltip={tooltip}>
+                                {Icon && <Icon className="icon-inline" />}{' '}
+                                <span className="d-none d-lg-inline">{label}</span>
+                            </ButtonLink>
+                        </li>
+                    )
+            )}
+            {rightActions.map((a, index) => (
+                <li className="nav-item repo-header__action-list-item" key={a.element.key || index}>
+                    {a.element}
+                </li>
+            ))}
+        </>
+    )
+
     // For rightActions dropdown
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const toggleDropdownOpen = useCallback(() => setIsDropdownOpen(isOpen => !isOpen), [])
@@ -224,46 +249,31 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                 ))}
             </ul>
             <div className="repo-header__spacer" />
-            <ul className="navbar-nav d-none d-lg-flex">
-                {props.actionButtons.map(
-                    ({ condition = () => true, label, tooltip, icon: Icon, to }) =>
-                        condition(context) && (
-                            <li className="nav-item repo-header__action-list-item" key={label}>
-                                <ButtonLink to={to(context)} data-tooltip={tooltip}>
-                                    {Icon && <Icon className="icon-inline" />}{' '}
-                                    <span className="d-none d-lg-inline">{label}</span>
-                                </ButtonLink>
-                            </li>
-                        )
-                )}
-                {rightActions.map((a, index) => (
-                    <li className="nav-item repo-header__action-list-item" key={a.element.key || index}>
-                        {a.element}
+            {isLarge ? (
+                <ul className="navbar-nav">{renderedRightActions}</ul>
+            ) : (
+                <ul className="navbar-nav">
+                    <li className="nav-item d-lg-none">
+                        <ButtonDropdown
+                            className="menu-nav-item"
+                            direction="down"
+                            isOpen={isDropdownOpen}
+                            toggle={toggleDropdownOpen}
+                        >
+                            <DropdownToggle className="bg-transparent" nav={true}>
+                                <DotsVerticalIcon className="icon-inline" />
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                {rightActions.map((a, index) => (
+                                    <DropdownItem key={a.element.key || index}>
+                                        <li className="nav-item repo-header__action-list-item">{a.element}</li>
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </ButtonDropdown>
                     </li>
-                ))}
-            </ul>
-            <ul className="navbar-nav">
-                <li className="nav-item d-lg-none">
-                    <ButtonDropdown
-                        className="menu-nav-item"
-                        direction="down"
-                        isOpen={isDropdownOpen}
-                        toggle={toggleDropdownOpen}
-                    >
-                        <DropdownToggle className="bg-transparent" nav={true}>
-                            <DotsVerticalIcon className="icon-inline" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            {rightActions.map((a, index) => (
-                                <DropdownItem key={a.element.key || index}>
-                                    {/* TODO(tj): render these differently, include actionButtons) */}
-                                    <li className="nav-item repo-header__action-list-item">{a.element}</li>
-                                </DropdownItem>
-                            ))}
-                        </DropdownMenu>
-                    </ButtonDropdown>
-                </li>
-            </ul>
+                </ul>
+            )}
             <ul className="navbar-nav">
                 <ActionItemsToggle useActionItemsToggle={props.useActionItemsToggle} />
             </ul>
