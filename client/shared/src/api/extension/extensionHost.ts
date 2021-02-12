@@ -285,7 +285,7 @@ function createExtensionAPI(
                 { text: '2 code owners', tooltip: 'Code owners: @felixbecker, @beyang' }
             )
             for (let index = 0; index < 25; index++) {
-                viewComponent.setStatusBarItem({ key: `fake-${index}` }, { text: `fake-${index}` })
+                viewComponent.setStatusBarItem({ key: `fake-${index}` }, { text: `Test status bar item #${index}` })
             }
         }
     })

@@ -86,7 +86,7 @@ export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions
 
                             // Observe carousel resizes, only compute scrollability once per frame.
                             // animationFrameScheduler is banned (https://github.com/sourcegraph/sourcegraph/pull/10367),
-                            // so approximate with asyncScheduler + 16ms debounce
+                            // so approximate with asyncScheduler + 16ms throttle
                             const carouselResizes = new Observable<void>(subscriber => {
                                 const resizeObserver = new ResizeObserver(() => subscriber.next())
                                 resizeObserver.observe(carousel)

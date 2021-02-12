@@ -86,6 +86,8 @@ export interface ActionItemProps extends ActionItemAction, ActionItemComponentPr
 
     /** Instead of showing the icon and/or title, show this element. */
     title?: JSX.Element | null
+
+    dataContent?: string
 }
 
 const LOADING = 'loading' as const
@@ -192,6 +194,7 @@ export class ActionItem extends React.PureComponent<ActionItemProps, State> {
             return (
                 <span
                     data-tooltip={tooltip}
+                    data-content={this.props.dataContent}
                     className={`action-item ${this.props.className || ''} ${variantClassName}`}
                 >
                     {content}
@@ -224,6 +227,7 @@ export class ActionItem extends React.PureComponent<ActionItemProps, State> {
                         ? `Error: ${this.state.actionOrError.message}`
                         : tooltip
                 }
+                data-content={this.props.dataContent}
                 disabled={
                     !this.props.active ||
                     ((this.props.disabledDuringExecution || this.props.showLoadingSpinnerDuringExecution) &&

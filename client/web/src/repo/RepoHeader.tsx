@@ -1,5 +1,5 @@
 import * as H from 'history'
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { ButtonLink } from '../../../shared/src/components/LinkOrButton'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
 import * as GQL from '../../../shared/src/graphql/schema'
@@ -14,6 +14,8 @@ import { AuthenticatedUser } from '../auth'
 import classNames from 'classnames'
 import { Scalars } from '../../../shared/src/graphql-operations'
 import { ActionItemsToggle, ActionItemsToggleProps } from '../extensions/components/ActionItemsBar'
+import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
+import DotsVerticalIcon from 'mdi-react/DotsVerticalIcon'
 
 /**
  * Stores the list of RepoHeaderContributions, manages addition/deletion, and ensures they are sorted.
@@ -199,6 +201,11 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
     }
     const leftActions = repoHeaderContributions.filter(({ position }) => position === 'left')
     const rightActions = repoHeaderContributions.filter(({ position }) => position === 'right')
+
+    // For rightActions dropdown
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const toggleDropdownOpen = useCallback(() => setIsDropdownOpen(isOpen => !isOpen), [])
+
     return (
         <nav
             className={classNames('repo-header navbar navbar-expand', {
@@ -218,7 +225,7 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
             </ul>
             <div className="repo-header__spacer" />
             <ul className="navbar-nav">
-                {props.actionButtons.map(
+                {/* {props.actionButtons.map(
                     ({ condition = () => true, label, tooltip, icon: Icon, to }) =>
                         condition(context) && (
                             <li className="nav-item repo-header__action-list-item" key={label}>
@@ -233,7 +240,27 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                     <li className="nav-item repo-header__action-list-item" key={a.element.key || index}>
                         {a.element}
                     </li>
-                ))}
+                ))} */}
+                <li className="nav-item d-lg-none">
+                    <ButtonDropdown
+                        className="menu-nav-item"
+                        direction="down"
+                        isOpen={isDropdownOpen}
+                        toggle={toggleDropdownOpen}
+                    >
+                        <DropdownToggle className="bg-transparent" nav={true}>
+                            <DotsVerticalIcon className="icon-inline" />
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            {rightActions.map((a, index) => (
+                                <DropdownItem key={a.element.key || index}>
+                                    {/* TODO(tj): render these differently, include actionButtons) */}
+                                    <li className="nav-item repo-header__action-list-item">{a.element}</li>
+                                </DropdownItem>
+                            ))}
+                        </DropdownMenu>
+                    </ButtonDropdown>
+                </li>
             </ul>
             <ul className="navbar-nav">
                 <ActionItemsToggle useActionItemsToggle={props.useActionItemsToggle} />

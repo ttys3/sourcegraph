@@ -6,6 +6,7 @@
         overflow-x: auto;
         white-space: nowrap;
 
+        scrollbar-width: none;
         &::-webkit-scrollbar {
             display: none;
         }
@@ -19,11 +20,21 @@
         &:hover {
             background-color: var(--link-hover-background-color);
         }
+
+        &--disabled {
+            visibility: hidden;
+            width: 0;
+            margin: 0;
+        }
     }
 
     &__item {
         &:not(:last-child) {
             margin-right: 0.25rem;
+        }
+
+        &:last-child {
+            padding-right: 0.5rem !important;
         }
 
         &--tooltipped {

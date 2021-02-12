@@ -11,7 +11,7 @@ import { ExtensionsControllerProps } from '../../../../shared/src/extensions/con
 import * as H from 'history'
 import { PlatformContextProps } from '../../../../shared/src/platform/context'
 import { TelemetryProps } from '../../../../shared/src/telemetry/telemetryService'
-import { ActionItem } from '../../../../shared/src/actions/ActionItem'
+import { ActionItem, ActionItemAction } from '../../../../shared/src/actions/ActionItem'
 import PlusIcon from 'mdi-react/PlusIcon'
 import { Link } from 'react-router-dom'
 import { merge, combineLatest, EMPTY, fromEvent, ReplaySubject } from 'rxjs'
@@ -128,6 +128,8 @@ export interface ActionItemsToggleProps {
     className?: string
 }
 
+const actionItemClassName = 'action-items__action d-flex justify-content-center align-items-center'
+
 /**
  *
  */
@@ -162,35 +164,50 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                 menu={ContributableMenu.EditorTitle}
                 returnInactiveMenuItems={true}
                 extensionsController={props.extensionsController}
-                empty={<p>No extensions</p>}
+                empty={null}
                 location={props.location}
                 platformContext={props.platformContext}
                 telemetryService={props.telemetryService}
             >
                 {items => (
                     <ul className="action-items__list list-unstyled m-0" ref={carouselReference}>
-                        {items.map(item => (
+                        {[
+                            ...items,
+                            // Temporary: testing default icons
+                            ...Array(20)
+                                .fill(null)
+                                .map<ActionItemAction>((_value, index) => ({
+                                    active: true,
+                                    action: {
+                                        category: String(index).slice(-1),
+                                        command: 'open',
+                                        actionItem: {},
+                                        id: `fake-${index}`,
+                                    },
+                                })),
+                        ].map((item, index) => (
                             <li key={item.action.id} className="action-items__list-item">
                                 <ActionItem
                                     {...props}
                                     {...item}
-                                    className="action-items__action d-block"
+                                    className={classNames(
+                                        actionItemClassName,
+                                        !item.action.actionItem?.iconURL &&
+                                            `action-items__action--no-icon action-items__icon-${
+                                                (index % 5) + 1
+                                            } text-sm`
+                                    )}
+                                    dataContent={
+                                        !item.action.actionItem?.iconURL ? item.action.category?.slice(0, 1) : undefined
+                                    }
                                     variant="actionItem"
-                                    iconClassName="icon-inline"
+                                    iconClassName="action-items__icon"
                                     pressedClassName="action-items__action--pressed"
                                     inactiveClassName="action-items__action--inactive"
                                     hideLabel={true}
                                 />
                             </li>
                         ))}
-                        {/* TODO(tj): remove fake action items after carousel testing */}
-                        {Array(20)
-                            .fill(null)
-                            .map((_val, i) => (
-                                <li className="action-items__list-item" key={i}>
-                                    <div className="action-items__action">F</div>
-                                </li>
-                            ))}
                     </ul>
                 )}
             </ActionsContainer>
@@ -208,7 +225,7 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                 <li className="action-items__list-item">
                     <Link
                         to="/extensions"
-                        className="nav-link action-items__action action-items__list-item"
+                        className={classNames(actionItemClassName, 'action-items__list-item')}
                         data-tooltip="Add extensions"
                     >
                         <PlusIcon className="icon-inline" />
@@ -237,7 +254,7 @@ export const ActionItemsToggle: React.FunctionComponent<ActionItemsToggleProps> 
                 )}
             >
                 <ButtonLink
-                    className={classNames('action-items__action d-block ')}
+                    className={classNames(actionItemClassName)}
                     onSelect={toggle}
                     buttonLinkRef={toggleReference}
                 >

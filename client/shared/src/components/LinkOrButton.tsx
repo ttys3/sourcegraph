@@ -40,6 +40,8 @@ interface Props extends Pick<AnchorHTMLAttributes<never>, 'target' | 'rel'> {
     id?: string
 
     buttonLinkRef?: React.Ref<HTMLAnchorElement>
+
+    ['data-content']?: string
 }
 
 /**
@@ -61,6 +63,7 @@ export const ButtonLink: React.FunctionComponent<Props> = ({
     children,
     id,
     buttonLinkRef = null,
+    'data-content': dataContent,
 }) => {
     // We need to set up a keypress listener because <a onclick> doesn't get
     // triggered by enter.
@@ -112,6 +115,7 @@ export const ButtonLink: React.FunctionComponent<Props> = ({
                 onClick={onClickPreventDefault}
                 onAuxClick={onClickPreventDefault}
                 ref={buttonLinkRef}
+                data-content={dataContent}
             >
                 {children}
             </a>
@@ -119,7 +123,7 @@ export const ButtonLink: React.FunctionComponent<Props> = ({
     }
 
     return (
-        <Link {...commonProps} to={to} target={target} rel={rel} ref={buttonLinkRef}>
+        <Link {...commonProps} to={to} target={target} rel={rel} ref={buttonLinkRef} data-content={dataContent}>
             {children}
         </Link>
     )
