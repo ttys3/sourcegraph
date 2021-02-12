@@ -19,6 +19,9 @@ import { filter, mapTo, switchMap, tap } from 'rxjs/operators'
 import { Key } from 'ts-key-enum'
 import { tabbable } from 'tabbable'
 import { head, last } from 'lodash'
+import { useCarousel } from '../../components/useCarousel'
+import MenuUpIcon from 'mdi-react/MenuUpIcon'
+import MenuDownIcon from 'mdi-react/MenuDownIcon'
 
 // Action items bar and toggle are two separate components due to their placement in the DOM tree
 
@@ -131,13 +134,30 @@ export interface ActionItemsToggleProps {
 export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
     const { isOpen, barReference } = props.useActionItemsBar()
 
+    const {
+        carouselReference,
+        canScrollNegative,
+        canScrollPositive,
+        onNegativeClicked,
+        onPositiveClicked,
+    } = useCarousel({ direction: 'topToBottom' })
+
     if (!isOpen) {
         return null
     }
 
     return (
-        <div className="action-items__bar p-0 border-left position-relative" ref={barReference}>
+        <div className="action-items__bar p-0 border-left position-relative d-flex flex-column" ref={barReference}>
             <ActionItemsDivider />
+            {canScrollNegative && (
+                <button
+                    type="button"
+                    className="btn btn-link action-items__scroll action-items__list-item p-0 border-0"
+                    onClick={onNegativeClicked}
+                >
+                    <MenuUpIcon className="icon-inline" />
+                </button>
+            )}
             <ActionsContainer
                 menu={ContributableMenu.EditorTitle}
                 returnInactiveMenuItems={true}
@@ -148,7 +168,7 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                 telemetryService={props.telemetryService}
             >
                 {items => (
-                    <ul className="list-unstyled m-0">
+                    <ul className="action-items__list list-unstyled m-0" ref={carouselReference}>
                         {items.map(item => (
                             <li key={item.action.id} className="action-items__list-item">
                                 <ActionItem
@@ -163,9 +183,26 @@ export const ActionItemsBar = React.memo<ActionItemsBarProps>(props => {
                                 />
                             </li>
                         ))}
+                        {/* TODO(tj): remove fake action items after carousel testing */}
+                        {Array(20)
+                            .fill(null)
+                            .map((_val, i) => (
+                                <li className="action-items__list-item" key={i}>
+                                    <div className="action-items__action">F</div>
+                                </li>
+                            ))}
                     </ul>
                 )}
             </ActionsContainer>
+            {canScrollPositive && (
+                <button
+                    type="button"
+                    className="btn btn-link action-items__scroll action-items__list-item p-0 border-0"
+                    onClick={onPositiveClicked}
+                >
+                    <MenuDownIcon className="icon-inline" />
+                </button>
+            )}
             <ActionItemsDivider />
             <ul className="list-unstyled m-0">
                 <li className="action-items__list-item">

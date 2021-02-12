@@ -51,7 +51,6 @@ export const ActionsContainer: React.FunctionComponent<Props> = ({
             [props.extensionsController, scope, extraContext, returnInactiveMenuItems]
         )
     )
-    console.log({ contributions })
 
     if (!contributions) {
         return null // loading

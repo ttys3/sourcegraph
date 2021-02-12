@@ -1,7 +1,6 @@
-import { add, subtract } from 'lodash'
 import { useCallback, useMemo } from 'react'
-import { BehaviorSubject, fromEvent, merge, of, ReplaySubject, Subject } from 'rxjs'
-import { map, switchMap, withLatestFrom, tap } from 'rxjs/operators'
+import { fromEvent, merge, Observable, of, ReplaySubject, Subject } from 'rxjs'
+import { map, switchMap, withLatestFrom, tap, debounceTime } from 'rxjs/operators'
 import { useObservable } from '../../../shared/src/util/useObservable'
 
 interface CarouselOptions {
@@ -29,7 +28,10 @@ const carouselScrollHandlers: Record<
         canScrollNegative: carousel.scrollLeft > 0,
         canScrollPositive: carousel.scrollLeft + carousel.clientWidth < carousel.scrollWidth,
     }),
-    topToBottom: () => ({ canScrollNegative: true, canScrollPositive: true }),
+    topToBottom: carousel => ({
+        canScrollNegative: carousel.scrollTop > 0,
+        canScrollPositive: carousel.scrollTop + carousel.clientHeight < carousel.scrollHeight,
+    }),
 }
 
 const carouselClickHandlers: Record<
@@ -38,15 +40,20 @@ const carouselClickHandlers: Record<
 > = {
     leftToRight: ({ carousel, amountToScroll, sign }) => {
         const width = carousel.clientWidth
-        const offset = carousel.scrollLeft
-        const operator = sign === 'positive' ? add : subtract
-        carousel.scrollTo({
+        carousel.scrollBy({
             top: 0,
-            left: Math.max(operator(offset, width * amountToScroll), 0),
+            left: sign === 'positive' ? width * amountToScroll : -(width * amountToScroll),
             behavior: 'smooth',
         })
     },
-    topToBottom: () => {},
+    topToBottom: ({ carousel, amountToScroll, sign }) => {
+        const height = carousel.clientHeight
+        carousel.scrollBy({
+            top: sign === 'positive' ? height * amountToScroll : -(height * amountToScroll),
+            left: 0,
+            behavior: 'smooth',
+        })
+    },
 }
 
 export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions): CarouselState {
@@ -72,11 +79,22 @@ export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions
                             }
 
                             // Initial scroll state
-                            const initial = new BehaviorSubject(undefined)
-                            const scrolls = fromEvent<React.UIEvent<HTMLElement>>(carousel, 'scroll')
-                            const resizes = fromEvent<React.UIEvent<HTMLElement>>(window, 'resize')
+                            const initial = of(undefined)
 
-                            return merge(initial, scrolls, resizes).pipe(
+                            const scrolls = fromEvent<React.UIEvent<HTMLElement>>(carousel, 'scroll')
+                            const windowResizes = fromEvent<React.UIEvent<HTMLElement>>(window, 'resize')
+
+                            // Observe carousel resizes, only compute scrollability once per frame.
+                            // animationFrameScheduler is banned (https://github.com/sourcegraph/sourcegraph/pull/10367),
+                            // so approximate with asyncScheduler + 16ms debounce
+                            const carouselResizes = new Observable<void>(subscriber => {
+                                const resizeObserver = new ResizeObserver(() => subscriber.next())
+                                resizeObserver.observe(carousel)
+                                return () => resizeObserver.disconnect
+                            })
+
+                            return merge(initial, scrolls, windowResizes, carouselResizes).pipe(
+                                debounceTime(16),
                                 map(() => carouselScrollHandlers[direction](carousel))
                             )
                         })
@@ -93,7 +111,9 @@ export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions
                     withLatestFrom(carouselReferences),
                     tap(([sign, carousel]) => {
                         if (carousel) {
-                            // TODO: check if it can be scrolled before scrolling
+                            // TODO: check if it can be scrolled before scrolling.
+                            // Not urgent, since the component shouldn't allow invalid scrolls,
+                            // and it's a noop regardless.
                             carouselClickHandlers[direction]({ sign, amountToScroll, carousel })
                         }
                     })
