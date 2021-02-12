@@ -1,7 +1,9 @@
+import { isEqual } from 'lodash'
 import { useCallback, useMemo } from 'react'
-import { fromEvent, merge, Observable, of, ReplaySubject, Subject } from 'rxjs'
-import { map, switchMap, withLatestFrom, tap, debounceTime } from 'rxjs/operators'
+import { fromEvent, merge, of, ReplaySubject, Subject } from 'rxjs'
+import { map, switchMap, withLatestFrom, tap, distinctUntilChanged } from 'rxjs/operators'
 import { useObservable } from '../../../shared/src/util/useObservable'
+import { observeResize } from '../util/dom'
 
 interface CarouselOptions {
     amountToScroll?: number
@@ -80,22 +82,12 @@ export function useCarousel({ amountToScroll = 0.9, direction }: CarouselOptions
 
                             // Initial scroll state
                             const initial = of(undefined)
-
                             const scrolls = fromEvent<React.UIEvent<HTMLElement>>(carousel, 'scroll')
-                            const windowResizes = fromEvent<React.UIEvent<HTMLElement>>(window, 'resize')
+                            const resizes = observeResize(carousel)
 
-                            // Observe carousel resizes, only compute scrollability once per frame.
-                            // animationFrameScheduler is banned (https://github.com/sourcegraph/sourcegraph/pull/10367),
-                            // so approximate with asyncScheduler + 16ms throttle
-                            const carouselResizes = new Observable<void>(subscriber => {
-                                const resizeObserver = new ResizeObserver(() => subscriber.next())
-                                resizeObserver.observe(carousel)
-                                return () => resizeObserver.disconnect
-                            })
-
-                            return merge(initial, scrolls, windowResizes, carouselResizes).pipe(
-                                debounceTime(16),
-                                map(() => carouselScrollHandlers[direction](carousel))
+                            return merge(initial, scrolls, resizes).pipe(
+                                map(() => carouselScrollHandlers[direction](carousel)),
+                                distinctUntilChanged((a, b) => isEqual(a, b))
                             )
                         })
                     ),
