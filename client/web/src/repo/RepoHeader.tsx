@@ -1,6 +1,5 @@
 import * as H from 'history'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
-import { ButtonLink } from '../../../shared/src/components/LinkOrButton'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
 import * as GQL from '../../../shared/src/graphql/schema'
 import { PlatformContextProps } from '../../../shared/src/platform/context'
@@ -17,6 +16,7 @@ import { ActionItemsToggle, ActionItemsToggleProps } from '../extensions/compone
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import DotsVerticalIcon from 'mdi-react/DotsVerticalIcon'
 import { useBreakpoint } from '../util/dom'
+import { Subject } from 'rxjs'
 
 /**
  * Stores the list of RepoHeaderContributions, manages addition/deletion, and ensures they are sorted.
@@ -31,27 +31,20 @@ class RepoHeaderContributionStore {
     ) {}
 
     private onRepoHeaderContributionAdd(item: RepoHeaderContribution): void {
-        if (!item.element) {
-            throw new Error('RepoHeaderContribution has no element')
-        }
-        if (typeof item.element.key !== 'string') {
-            throw new TypeError(
-                `RepoHeaderContribution (${item.element.type.toString()}) element must have a string key`
-            )
+        if (!item.render || typeof item.render !== 'function') {
+            throw new Error('RepoHeaderContribution has no render function')
         }
 
         this.setState((previousContributions: RepoHeaderContribution[]) =>
             previousContributions
-                .filter(({ element }) => element.key !== item.element.key)
+                .filter(({ id }) => id !== item.id)
                 .concat(item)
                 .sort(byPriority)
         )
     }
 
-    private onRepoHeaderContributionRemove(key: string): void {
-        this.setState(previousContributions =>
-            previousContributions.filter(contribution => contribution.element.key !== key)
-        )
+    private onRepoHeaderContributionRemove(id: string): void {
+        this.setState(previousContributions => previousContributions.filter(contribution => contribution.id !== id))
     }
 
     /** Props to pass to the owner's children (that need to contribute to RepoHeader). */
@@ -73,7 +66,7 @@ function byPriority(a: { priority?: number }, b: { priority?: number }): number 
  */
 export interface RepoHeaderContribution {
     /** The position of this contribution in the RepoHeader. */
-    position: 'nav' | 'left' | 'right'
+    position: 'left' | 'right'
 
     /**
      * Controls the relative order of header action items. The items are laid out from highest priority (at the
@@ -81,17 +74,12 @@ export interface RepoHeaderContribution {
      */
     priority?: number
 
-    /**
-     * The element to display in the RepoHeader. The element *must* have a React key that is a string and is unique
-     * among all RepoHeaderContributions. If not, an exception will be thrown.
-     */
-    element: React.ReactElement
-}
+    id: string
 
-/** React props for components that store or display RepoHeaderContributions. */
-export interface RepoHeaderContributionsProps {
-    /** Contributed items to display in the RepoHeader. */
-    repoHeaderContributions: RepoHeaderContribution[]
+    /**
+     * Render function called with RepoHeaderContext
+     */
+    render: (context: RepoHeaderContext) => React.ReactElement
 }
 
 /**
@@ -109,7 +97,7 @@ export interface RepoHeaderContributionsLifecycleProps {
          * Called when a new RepoHeader contribution is removed (and should no longer be shown in RepoHeader). The key
          * is the same as that of the contribution's element (when it was added).
          */
-        onRepoHeaderContributionRemove: (key: string) => void
+        onRepoHeaderContributionRemove: (id: string) => void
     }
 }
 
@@ -121,6 +109,8 @@ export interface RepoHeaderContext {
     repoName: string
     /** The current URI-decoded revision (e.g., "my#branch" in "my/repo@my%23branch"). */
     encodedRev?: string
+
+    actionType: 'nav' | 'dropdown'
 }
 
 export interface RepoHeaderActionButton extends ActionButtonDescriptor<RepoHeaderContext> {}
@@ -194,40 +184,36 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
     )
     useEffect(() => {
         onLifecyclePropsChange(repoHeaderContributionStore.props)
-    }, [onLifecyclePropsChange, repoHeaderContributionStore])
-
-    const context: RepoHeaderContext = {
-        repoName: repo.name,
-        encodedRev: props.revision,
-    }
-    const leftActions = repoHeaderContributions.filter(({ position }) => position === 'left')
-    const rightActions = repoHeaderContributions.filter(({ position }) => position === 'right')
+    }, [onLifecyclePropsChange, repoHeaderContributionStore.props])
 
     const isLarge = useBreakpoint('lg')
 
-    const renderedRightActions = (
-        <>
-            {/* TODO: actionButtons seem to be useless, remove? */}
-            {props.actionButtons.map(
-                ({ condition = () => true, label, tooltip, icon: Icon, to }) =>
-                    condition(context) && (
-                        <li className="nav-item repo-header__action-list-item" key={label}>
-                            <ButtonLink to={to(context)} data-tooltip={tooltip}>
-                                {Icon && <Icon className="icon-inline" />}{' '}
-                                <span className="d-none d-lg-inline">{label}</span>
-                            </ButtonLink>
-                        </li>
-                    )
-            )}
-            {rightActions.map((a, index) => (
-                <li className="nav-item repo-header__action-list-item" key={a.element.key || index}>
-                    {a.element}
-                </li>
-            ))}
-        </>
+    const context: Omit<RepoHeaderContext, 'actionType'> = useMemo(
+        () => ({
+            repoName: repo.name,
+            encodedRev: props.revision,
+        }),
+        [repo.name, props.revision]
     )
 
-    // For rightActions dropdown
+    const leftActions = useMemo(
+        () =>
+            repoHeaderContributions
+                .filter(({ position }) => position === 'left')
+                .map(({ render, ...rest }) => ({ ...rest, element: render({ ...context, actionType: 'nav' }) })),
+        [context, repoHeaderContributions]
+    )
+    const rightActions = useMemo(
+        () =>
+            repoHeaderContributions
+                .filter(({ position }) => position === 'right')
+                .map(({ render, ...rest }) => ({
+                    ...rest,
+                    element: render({ ...context, actionType: isLarge ? 'nav' : 'dropdown' }),
+                })),
+        [context, repoHeaderContributions, isLarge]
+    )
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const toggleDropdownOpen = useCallback(() => setIsDropdownOpen(isOpen => !isOpen), [])
 
@@ -243,14 +229,20 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
             </div>
             <ul className="navbar-nav">
                 {leftActions.map((a, index) => (
-                    <li className="nav-item" key={a.element.key || index}>
+                    <li className="nav-item" key={a.id || index}>
                         {a.element}
                     </li>
                 ))}
             </ul>
             <div className="repo-header__spacer" />
             {isLarge ? (
-                <ul className="navbar-nav">{renderedRightActions}</ul>
+                <ul className="navbar-nav">
+                    {rightActions.map((a, index) => (
+                        <li className="nav-item repo-header__action-list-item" key={a.id || index}>
+                            {a.element}
+                        </li>
+                    ))}
+                </ul>
             ) : (
                 <ul className="navbar-nav">
                     <li className="nav-item d-lg-none">
@@ -265,8 +257,8 @@ export const RepoHeader: React.FunctionComponent<Props> = ({
                             </DropdownToggle>
                             <DropdownMenu>
                                 {rightActions.map((a, index) => (
-                                    <DropdownItem key={a.element.key || index}>
-                                        <li className="nav-item repo-header__action-list-item">{a.element}</li>
+                                    <DropdownItem className="p-0" key={a.id || index}>
+                                        {a.element}
                                     </DropdownItem>
                                 ))}
                             </DropdownMenu>

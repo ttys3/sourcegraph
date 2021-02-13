@@ -219,6 +219,8 @@ export const RepoRevisionContainer: React.FunctionComponent<RepoRevisionContaine
         resolvedRev: props.resolvedRevisionOrError,
     }
 
+    const resolvedRevisionOrError = props.resolvedRevisionOrError
+
     return (
         <div className="repo-revision-container">
             <Switch>
@@ -238,21 +240,24 @@ export const RepoRevisionContainer: React.FunctionComponent<RepoRevisionContaine
             </Switch>
             <RepoHeaderContributionPortal
                 position="left"
-                element={<CopyLinkAction key="copy-link" location={props.location} />}
+                id="copy-link"
+                render={() => <CopyLinkAction key="copy-link" location={props.location} />}
                 repoHeaderContributionsLifecycleProps={props.repoHeaderContributionsLifecycleProps}
             />
             <RepoHeaderContributionPortal
                 position="right"
                 priority={3}
-                element={
+                id="go-to-permalink"
+                render={context => (
                     <GoToPermalinkAction
                         key="go-to-permalink"
                         revision={props.revision}
-                        commitID={props.resolvedRevisionOrError.commitID}
+                        commitID={resolvedRevisionOrError.commitID}
                         location={props.location}
                         history={props.history}
+                        {...context}
                     />
-                }
+                )}
                 repoHeaderContributionsLifecycleProps={props.repoHeaderContributionsLifecycleProps}
             />
         </div>

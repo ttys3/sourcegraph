@@ -366,20 +366,28 @@ export const RepoContainer: React.FunctionComponent<RepoContainerProps> = props 
                 />
             )}
             <RepoHeader
-                {...props}
                 actionButtons={props.repoHeaderActionButtons}
                 useActionItemsToggle={useActionItemsToggle}
+                breadcrumbs={props.breadcrumbs}
                 revision={revision}
                 repo={repoOrError}
                 resolvedRev={resolvedRevisionOrError}
                 onLifecyclePropsChange={setRepoHeaderContributionsLifecycleProps}
                 isAlertDisplayed={showExtensionAlert}
+                location={props.location}
+                history={props.history}
+                settingsCascade={props.settingsCascade}
+                authenticatedUser={props.authenticatedUser}
+                platformContext={props.platformContext}
+                extensionsController={props.extensionsController}
+                telemetryService={props.telemetryService}
             />
             <RepoHeaderContributionPortal
                 position="right"
                 priority={2}
+                id="go-to-code-host"
                 {...repoHeaderContributionsLifecycleProps}
-                element={
+                render={({ actionType }) => (
                     <GoToCodeHostAction
                         key="go-to-code-host"
                         repo={repoOrError}
@@ -393,8 +401,25 @@ export const RepoContainer: React.FunctionComponent<RepoContainerProps> = props 
                         fetchFileExternalLinks={fetchFileExternalLinks}
                         canShowPopover={canShowPopover}
                         onPopoverDismissed={onPopoverDismissed}
+                        actionType={actionType}
                     />
-                }
+                )}
+                // element={
+                //     <GoToCodeHostAction
+                //         key="go-to-code-host"
+                //         repo={repoOrError}
+                //         // We need a revision to generate code host URLs, if revision isn't available, we use the default branch or HEAD.
+                //         revision={rawRevision || repoOrError.defaultBranch?.displayName || 'HEAD'}
+                //         filePath={filePath}
+                //         commitRange={commitRange}
+                //         position={position}
+                //         range={range}
+                //         externalLinks={externalLinks}
+                //         fetchFileExternalLinks={fetchFileExternalLinks}
+                //         canShowPopover={canShowPopover}
+                //         onPopoverDismissed={onPopoverDismissed}
+                //     />
+                // }
             />
             <ErrorBoundary location={props.location}>
                 <Switch>
