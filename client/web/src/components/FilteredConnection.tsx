@@ -303,7 +303,7 @@ class ConnectionNodes<C extends Connection<N>, N, NP = {}> extends React.PureCom
                     <button
                         type="button"
                         className={classNames(
-                            'btn btn-secondary btn-sm filtered-connection__show-more',
+                            'btn btn-secondary btn-sm filtered-connection__show-more position-sticky',
                             this.props.showMoreClassName
                         )}
                         onClick={this.onClickShowMore}
@@ -834,7 +834,7 @@ export class FilteredConnection<N, NP = {}, C extends Connection<N> = Connection
             >
                 {(!this.props.hideSearch || this.props.filters) && (
                     <Form
-                        className="w-100 d-inline-flex justify-content-between flex-row filtered-connection__form"
+                        className="w-100 d-inline-flex justify-content-between flex-row filtered-connection__form position-sticky"
                         onSubmit={this.onSubmit}
                     >
                         {this.props.filters && (
