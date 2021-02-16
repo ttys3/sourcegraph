@@ -76,6 +76,9 @@ export class Tooltip extends React.PureComponent<Props, State> {
                     flip: {
                         enabled: false,
                     },
+                    preventOverflow: {
+                        boundariesElement: 'window',
+                    },
                 }}
                 delay={this.state.delay}
             >
