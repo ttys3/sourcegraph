@@ -103,11 +103,7 @@ func (fm *FileMatchResolver) Symbols() []*symbolResolver {
 }
 
 func (fm *FileMatchResolver) LineMatches() []*lineMatchResolver {
-	r := make([]*lineMatchResolver, 0, len(fm.JLineMatches))
-	for _, lm := range fm.JLineMatches {
-		r = append(r, &lineMatchResolver{*lm})
-	}
-	return r
+	return fm.JLineMatches
 }
 
 func (fm *FileMatchResolver) LimitHit() bool {
@@ -181,9 +177,7 @@ type lineMatch struct {
 	JLimitHit         bool       `json:"LimitHit"`
 }
 
-type lineMatchResolver struct {
-	lineMatch
-}
+type lineMatchResolver = lineMatch
 
 func (lm *lineMatchResolver) Preview() string {
 	return lm.JPreview
