@@ -44,6 +44,9 @@ import {
     ScheduleUserPermissionsSyncVariables,
     ScheduleRepositoryPermissionsSyncResult,
     ScheduleRepositoryPermissionsSyncVariables,
+    OutOfBandMigrationFields,
+    OutOfBandMigrationsResult,
+    OutOfBandMigrationsVariables,
 } from '../graphql-operations'
 
 /**
@@ -790,5 +793,41 @@ export function fetchMonitoringStats(days: number): Observable<GQL.IMonitoringSt
             }
             return data
         })
+    )
+}
+
+/**
+ * Fetches all out-of-band migrations.
+ */
+export function fetchAllOutOfBandMigrations(): Observable<OutOfBandMigrationFields[]> {
+    return requestGraphQL<OutOfBandMigrationsResult, OutOfBandMigrationsVariables>(
+        gql`
+            query OutOfBandMigrations {
+                outOfBandMigrations {
+                    ...OutOfBandMigrationFields
+                }
+            }
+
+            fragment OutOfBandMigrationFields on OutOfBandMigration {
+                id
+                team
+                component
+                description
+                introduced
+                deprecated
+                progress
+                created
+                lastUpdated
+                nonDestructive
+                applyReverse
+                errors {
+                    message
+                    created
+                }
+            }
+        `
+    ).pipe(
+        map(dataOrThrowErrors),
+        map(data => data.outOfBandMigrations)
     )
 }

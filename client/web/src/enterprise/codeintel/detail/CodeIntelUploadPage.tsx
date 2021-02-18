@@ -4,7 +4,7 @@ import DeleteIcon from 'mdi-react/DeleteIcon'
 import InformationOutlineIcon from 'mdi-react/InformationOutlineIcon'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Redirect, RouteComponentProps } from 'react-router'
-import { SchedulerLike, timer } from 'rxjs'
+import { timer } from 'rxjs'
 import { catchError, concatMap, delay, repeatWhen, takeWhile } from 'rxjs/operators'
 import { LSIFUploadState } from '../../../../../shared/src/graphql-operations'
 import { TelemetryProps } from '../../../../../shared/src/telemetry/telemetryService'
@@ -21,10 +21,8 @@ import { CodeIntelUploadTimeline } from './CodeIntelUploadTimeline'
 
 export interface CodeIntelUploadPageProps extends RouteComponentProps<{ id: string }>, TelemetryProps {
     fetchLsifUpload?: typeof defaultFetchUpload
-    now?: () => Date
-    /** Scheduler for the refresh timer */
-    scheduler?: SchedulerLike
     history: H.History
+    now?: () => Date
 }
 
 const REFRESH_INTERVAL_MS = 5000
@@ -35,13 +33,12 @@ const classNamesByState = new Map([
 ])
 
 export const CodeIntelUploadPage: FunctionComponent<CodeIntelUploadPageProps> = ({
-    scheduler,
     match: {
         params: { id },
     },
-    history,
     fetchLsifUpload = defaultFetchUpload,
     telemetryService,
+    history,
     now,
 }) => {
     useEffect(() => telemetryService.logViewEvent('CodeIntelUpload'), [telemetryService])
@@ -51,7 +48,7 @@ export const CodeIntelUploadPage: FunctionComponent<CodeIntelUploadPageProps> = 
     const uploadOrError = useObservable(
         useMemo(
             () =>
-                timer(0, REFRESH_INTERVAL_MS, scheduler).pipe(
+                timer(0, REFRESH_INTERVAL_MS, undefined).pipe(
                     concatMap(() =>
                         fetchLsifUpload({ id }).pipe(
                             catchError((error): [ErrorLike] => [asError(error)]),
@@ -60,7 +57,7 @@ export const CodeIntelUploadPage: FunctionComponent<CodeIntelUploadPageProps> = 
                     ),
                     takeWhile(shouldReload, true)
                 ),
-            [id, scheduler, fetchLsifUpload]
+            [id, fetchLsifUpload]
         )
     )
 
