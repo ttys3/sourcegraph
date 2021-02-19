@@ -577,13 +577,11 @@ func findPatternRevs(includePatterns []string) (includePatternRevs []patternRevs
 }
 
 func hasTypeRepo(q query.Q) bool {
-	fields := q.Fields()
-	if len(fields["type"]) == 0 {
-		return false
-	}
-	for _, t := range fields["type"] {
-		if t.Value() == "repo" {
-			return true
+	if values, _ := q.StringValues(query.FieldType); len(values) != 0 {
+		for _, v := range values {
+			if v == "repo" {
+				return true
+			}
 		}
 	}
 	return false

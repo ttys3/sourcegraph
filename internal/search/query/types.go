@@ -36,7 +36,6 @@ type QueryInfo interface {
 	StringValues(field string) (values, negatedValues []string)
 	StringValue(field string) (value, negatedValue string)
 	Values(field string) []*Value
-	Fields() map[string][]*Value
 	BoolValue(field string) bool
 	IsCaseSensitive() bool
 }
@@ -93,17 +92,6 @@ func (q Q) Values(field string) []*Value {
 		})
 	}
 	return values
-}
-
-func (q Q) Fields() map[string][]*Value {
-	fields := make(map[string][]*Value)
-	VisitPattern(q, func(value string, _ bool, _ Annotation) {
-		fields[""] = q.Values("")
-	})
-	VisitParameter(q, func(field, _ string, _ bool, _ Annotation) {
-		fields[field] = q.Values(field)
-	})
-	return fields
 }
 
 func (q Q) BoolValue(field string) bool {
