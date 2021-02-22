@@ -14,6 +14,8 @@ import (
 func registerMigrations(ctx context.Context, db dbutil.DB, outOfBandMigrationRunner *oobmigration.Runner) error {
 	migrators := map[int]oobmigration.Migrator{
 		lsifstore.DiagnosticsCountMigrationID: lsifstore.NewDiagnosticsCountMigrator(services.lsifStore),
+		lsifstore.DefinitionsCountMigrationID: lsifstore.NewLocationsCountMigrator(services.lsifStore, "lsif_data_definitions"),
+		lsifstore.ReferencesCountMigrationID:  lsifstore.NewLocationsCountMigrator(services.lsifStore, "lsif_data_references"),
 	}
 
 	for id, migrator := range migrators {

@@ -17,12 +17,14 @@ Holds a single column storing the status of the most recent migration attempt.
 
 # Table "public.lsif_data_definitions"
 ```
-   Column   |  Type   | Modifiers 
-------------+---------+-----------
- dump_id    | integer | not null
- scheme     | text    | not null
- identifier | text    | not null
- data       | bytea   | 
+     Column     |  Type   | Modifiers 
+----------------+---------+-----------
+ dump_id        | integer | not null
+ scheme         | text    | not null
+ identifier     | text    | not null
+ data           | bytea   | 
+ schema_version | integer | not null
+ num_locations  | integer | not null
 Indexes:
     "lsif_data_definitions_pkey" PRIMARY KEY, btree (dump_id, scheme, identifier)
 
@@ -35,6 +37,10 @@ Associates (document, range) pairs with the import monikers attached to the rang
 **dump_id**: The identifier of the associated dump in the lsif_uploads table (state=completed).
 
 **identifier**: The moniker identifier.
+
+**num_locations**: The number of locations stored in the data field.
+
+**schema_version**: The schema version of this row - used to determine presence and encoding of data.
 
 **scheme**: The moniker scheme.
 
@@ -83,12 +89,14 @@ Stores the number of result chunks associated with a dump.
 
 # Table "public.lsif_data_references"
 ```
-   Column   |  Type   | Modifiers 
-------------+---------+-----------
- dump_id    | integer | not null
- scheme     | text    | not null
- identifier | text    | not null
- data       | bytea   | 
+     Column     |  Type   | Modifiers 
+----------------+---------+-----------
+ dump_id        | integer | not null
+ scheme         | text    | not null
+ identifier     | text    | not null
+ data           | bytea   | 
+ schema_version | integer | not null
+ num_locations  | integer | not null
 Indexes:
     "lsif_data_references_pkey" PRIMARY KEY, btree (dump_id, scheme, identifier)
 
@@ -101,6 +109,10 @@ Associates (document, range) pairs with the export monikers attached to the rang
 **dump_id**: The identifier of the associated dump in the lsif_uploads table (state=completed).
 
 **identifier**: The moniker identifier.
+
+**num_locations**: The number of locations stored in the data field.
+
+**schema_version**: The schema version of this row - used to determine presence and encoding of data.
 
 **scheme**: The moniker scheme.
 

@@ -126,6 +126,10 @@ func (s *Store) WriteReferences(ctx context.Context, bundleID int, monikerLocati
 	return nil
 }
 
+// CurrentLocationSchemaVersion is the schema version used for new rows to the lsif_data_definitions
+// and lsif_data_references tables.
+const CurrentLocationSchemaVersion = 2
+
 func (s *Store) writeDefinitionReferences(ctx context.Context, bundleID int, tableName string, monikerLocations chan MonikerLocations) (int, error) {
 	var count uint32
 
@@ -136,7 +140,7 @@ func (s *Store) writeDefinitionReferences(ctx context.Context, bundleID int, tab
 				return err
 			}
 
-			if err := inserter.Insert(ctx, bundleID, v.Scheme, v.Identifier, data); err != nil {
+			if err := inserter.Insert(ctx, bundleID, v.Scheme, v.Identifier, data, CurrentLocationSchemaVersion, len(v.Locations)); err != nil {
 				return err
 			}
 
@@ -146,7 +150,7 @@ func (s *Store) writeDefinitionReferences(ctx context.Context, bundleID int, tab
 		return nil
 	}
 
-	err := withBatchInserter(ctx, s.Handle().DB(), tableName, []string{"dump_id", "scheme", "identifier", "data"}, inserter)
+	err := withBatchInserter(ctx, s.Handle().DB(), tableName, []string{"dump_id", "scheme", "identifier", "data", "schema_version", "num_locations"}, inserter)
 	return int(count), err
 }
 

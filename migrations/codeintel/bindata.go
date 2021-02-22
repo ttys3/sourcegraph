@@ -12,6 +12,8 @@
 // 1000000004_comments.up.sql (3.631kB)
 // 1000000005_diagnostic_counts.down.sql (158B)
 // 1000000005_diagnostic_counts.up.sql (690B)
+// 1000000006_locations_counts.down.sql (301B)
+// 1000000006_locations_counts.up.sql (1.26kB)
 
 package migrations
 
@@ -320,6 +322,46 @@ func _1000000005_diagnostic_countsUpSql() (*asset, error) {
 	return a, nil
 }
 
+var __1000000006_locations_countsDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xa4\xce\xd1\x0a\xc2\x20\x14\x80\xe1\x7b\x9f\xe2\xbc\x87\x57\xdb\xb2\x10\x74\xc6\x66\xd0\x9d\x88\x3b\xd2\x81\xed\x08\xba\x7a\xfe\xa0\xcb\x20\x82\xba\xff\xf9\xf8\x7b\x75\xd2\xa3\x14\xa2\x33\x5e\x4d\xe0\xbb\xde\x28\x58\x1b\xe5\xb0\xc4\x3d\x86\x05\x33\x31\xed\x54\xb8\xc1\x61\x72\x67\x18\x9c\xb9\xd8\x11\xf4\x11\xd4\x55\xcf\x7e\x86\x96\x6e\xb8\xc5\xf0\xc0\xda\xa8\xb0\xfc\xd9\xe1\xfb\x16\xd6\x92\xe2\xab\xf9\xc4\x54\xcc\x58\x91\x13\xfe\x77\xf3\x95\x79\x9b\x11\x83\xb3\x56\x7b\x29\x9e\x01\x00\x00\xff\xff\xf6\xf4\x3d\xc6\x2d\x01\x00\x00")
+
+func _1000000006_locations_countsDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__1000000006_locations_countsDownSql,
+		"1000000006_locations_counts.down.sql",
+	)
+}
+
+func _1000000006_locations_countsDownSql() (*asset, error) {
+	bytes, err := _1000000006_locations_countsDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "1000000006_locations_counts.down.sql", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x7e, 0x8d, 0x96, 0x22, 0xc2, 0x52, 0xaf, 0xaa, 0xb6, 0xd, 0x62, 0x7, 0x20, 0x2d, 0x34, 0xd1, 0x3f, 0xf5, 0xdd, 0x3c, 0x3d, 0x45, 0x88, 0xd2, 0xd6, 0xa9, 0x9f, 0xae, 0x50, 0xd8, 0xb0, 0xb9}}
+	return a, nil
+}
+
+var __1000000006_locations_countsUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xcc\x93\x4d\xaf\x93\x40\x18\x85\xf7\xfc\x8a\xb3\xbb\xab\xde\xe8\x9a\x15\xf7\x82\xa6\x09\x05\x53\xe9\x9a\x4c\x99\x77\x64\x92\xe1\x1d\x32\x1f\x55\xff\xbd\xa1\x8a\xa5\xa6\x5a\x8c\x5d\xb8\x65\x26\xcf\x79\xce\x99\xf0\x52\xbc\xdf\x56\x69\x92\x24\x9b\x0d\x94\xf0\x81\x1c\x82\x85\x8f\xe3\x68\xbe\x42\x92\x12\xd1\x04\x84\x5e\x30\x06\xc1\x51\x18\xc4\x51\x8a\x40\x49\x56\x36\xc5\x1e\x4d\xf6\x52\x16\x30\x5e\xab\x56\x8a\x20\x5a\x49\x4a\xb3\x0e\xda\xb2\x47\x96\xe7\x78\xad\xcb\xc3\xae\x82\xef\x7a\x1a\x44\x7b\x22\xe7\xb5\x65\x68\x0e\xc8\x8b\x77\xd9\xa1\x6c\xf0\x16\x55\xdd\xa0\x3a\x94\x65\xfa\x77\x4c\x8e\x43\x6b\x6c\x27\xbe\x1f\x2c\x91\x6f\xee\x22\x1d\x29\x72\xc4\x1d\x3d\xce\xf2\x36\x72\x9d\xe4\xb4\xbd\x74\x76\xfc\xb9\xb7\x50\xd3\x3b\x08\x63\x40\x5f\xb4\x0f\x9a\x3f\xa1\xb3\x26\x0e\xec\xd1\x8b\x13\xe1\x48\xc4\xf0\x14\xd6\x2c\x76\xbe\x71\xbb\x61\xbe\xaf\x3f\xcc\x42\xab\xd6\x5f\xb2\xae\xab\xad\x41\x2d\x27\xfa\x47\xab\xdf\xa1\xfe\x24\x95\xbc\xd6\xbb\x5d\x51\x35\xa8\xab\xf9\xfa\xcd\x9a\xcf\xbf\xf8\x6c\x3f\xe2\xa9\xe9\xe9\x87\x26\xe6\xcf\x56\x21\xf4\xda\xc3\xd9\xcf\xd8\x20\x7a\x92\xd3\x8f\x23\x29\x90\x1b\x34\x13\x46\x47\x7e\x32\x84\x60\x09\xe2\xce\xca\xe9\x19\xad\xc2\x94\xf7\xfc\x94\xae\xd6\xb9\xee\x34\xdb\x70\x1c\x8e\xe4\x26\xde\xe5\xcc\x07\xeb\x48\x42\x33\x42\x4f\xe7\x1c\x28\x4d\x46\xde\x4b\xbb\xac\xf9\x3f\x74\x5f\xd8\x3c\xa6\xfa\x39\x6d\xdb\xa4\xc9\xb7\x00\x00\x00\xff\xff\xd4\xf9\x88\xe8\xec\x04\x00\x00")
+
+func _1000000006_locations_countsUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__1000000006_locations_countsUpSql,
+		"1000000006_locations_counts.up.sql",
+	)
+}
+
+func _1000000006_locations_countsUpSql() (*asset, error) {
+	bytes, err := _1000000006_locations_countsUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "1000000006_locations_counts.up.sql", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0xb4, 0xc2, 0x33, 0xa6, 0xe0, 0xdc, 0xcb, 0xe9, 0xf4, 0xc7, 0xc3, 0x9a, 0x94, 0xe5, 0x93, 0x39, 0x9a, 0x20, 0x12, 0x58, 0x65, 0x44, 0xaa, 0x74, 0x6f, 0x73, 0x27, 0xa, 0xb8, 0x76, 0xea, 0x5f}}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -423,6 +465,8 @@ var _bindata = map[string]func() (*asset, error){
 	"1000000004_comments.up.sql":                _1000000004_commentsUpSql,
 	"1000000005_diagnostic_counts.down.sql":     _1000000005_diagnostic_countsDownSql,
 	"1000000005_diagnostic_counts.up.sql":       _1000000005_diagnostic_countsUpSql,
+	"1000000006_locations_counts.down.sql":      _1000000006_locations_countsDownSql,
+	"1000000006_locations_counts.up.sql":        _1000000006_locations_countsUpSql,
 }
 
 // AssetDebug is true if the assets were built with the debug flag enabled.
@@ -481,6 +525,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"1000000004_comments.up.sql":                {_1000000004_commentsUpSql, map[string]*bintree{}},
 	"1000000005_diagnostic_counts.down.sql":     {_1000000005_diagnostic_countsDownSql, map[string]*bintree{}},
 	"1000000005_diagnostic_counts.up.sql":       {_1000000005_diagnostic_countsUpSql, map[string]*bintree{}},
+	"1000000006_locations_counts.down.sql":      {_1000000006_locations_countsDownSql, map[string]*bintree{}},
+	"1000000006_locations_counts.up.sql":        {_1000000006_locations_countsUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory.
