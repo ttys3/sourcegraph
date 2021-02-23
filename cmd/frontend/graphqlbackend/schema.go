@@ -1819,6 +1819,10 @@ type Campaign implements Node {
         Search for changesets matching this query. Queries may include quoted substrings to match phrases, and words may be preceded by - to negate them.
         """
         search: String
+        """
+        Only return changesets that are not managed actively by the campaign anymore, i.e. they have once been published by the campaign but have been detached.
+        """
+        onlyInactive: Boolean
     ): ChangesetConnection!
 
     """

@@ -700,6 +700,13 @@ func listChangesetOptsFromArgs(args *graphqlbackend.ListChangesetsArgs, campaign
 		opts.OwnedByCampaignID = campaignID
 		opts.PublicationState = &published
 	}
+
+	if args.OnlyDetached != nil && *args.OnlyDetached {
+		// TODO: Hacky McHackerson was here
+		opts.OwnedByCampaignID = campaignID
+		opts.IncludeDetachedButOwnedByCampaign = true
+	}
+
 	if args.Search != nil {
 		var err error
 		opts.TextSearch, err = search.ParseTextSearch(*args.Search)

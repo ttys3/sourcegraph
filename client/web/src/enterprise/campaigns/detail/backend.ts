@@ -201,6 +201,7 @@ export const queryChangesets = ({
     reviewState,
     checkState,
     onlyPublishedByThisCampaign,
+    includeDetached,
     search,
 }: CampaignChangesetsVariables): Observable<
     (CampaignChangesetsResult['node'] & { __typename: 'Campaign' })['changesets']
@@ -215,6 +216,7 @@ export const queryChangesets = ({
                 $reviewState: ChangesetReviewState
                 $checkState: ChangesetCheckState
                 $onlyPublishedByThisCampaign: Boolean
+                $includeDetached: Boolean
                 $search: String
             ) {
                 node(id: $campaign) {
@@ -227,6 +229,7 @@ export const queryChangesets = ({
                             reviewState: $reviewState
                             checkState: $checkState
                             onlyPublishedByThisCampaign: $onlyPublishedByThisCampaign
+                            includeDetached: $includeDetached
                             search: $search
                         ) {
                             totalCount
@@ -252,6 +255,7 @@ export const queryChangesets = ({
             reviewState,
             checkState,
             onlyPublishedByThisCampaign,
+            includeDetached,
             search,
         }
     ).pipe(

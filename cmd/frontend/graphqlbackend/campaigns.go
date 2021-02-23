@@ -353,6 +353,7 @@ type ListChangesetsArgs struct {
 	ReviewState                 *campaigns.ChangesetReviewState
 	CheckState                  *campaigns.ChangesetCheckState
 	OnlyPublishedByThisCampaign *bool
+	OnlyDetached                *bool
 	Search                      *string
 }
 

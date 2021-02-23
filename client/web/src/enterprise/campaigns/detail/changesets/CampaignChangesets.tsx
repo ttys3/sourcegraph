@@ -77,6 +77,7 @@ export const CampaignChangesets: React.FunctionComponent<Props> = ({
                 after: args.after ?? null,
                 campaign: campaignID,
                 onlyPublishedByThisCampaign: null,
+                includeDetached: false,
                 search: changesetFilters.search,
             }).pipe(repeatWhen(notifier => notifier.pipe(delay(5000)))),
         [
@@ -87,6 +88,22 @@ export const CampaignChangesets: React.FunctionComponent<Props> = ({
             changesetFilters.search,
             queryChangesets,
         ]
+    )
+
+    const queryDetachedChangesetsConnection = useCallback(
+        (args: FilteredConnectionQueryArguments) =>
+            queryChangesets({
+                campaign: campaignID,
+                includeDetached: true,
+                state: null,
+                reviewState: null,
+                checkState: null,
+                first: args.first ?? null,
+                after: args.after ?? null,
+                onlyPublishedByThisCampaign: null,
+                search: null,
+            }).pipe(repeatWhen(notifier => notifier.pipe(delay(5000)))),
+        [campaignID, queryChangesets]
     )
 
     const containerElements = useMemo(() => new Subject<HTMLElement | null>(), [])
@@ -162,6 +179,54 @@ export const CampaignChangesets: React.FunctionComponent<Props> = ({
                         queryExternalChangesetWithFileDiffs,
                     }}
                     queryConnection={queryChangesetsConnection}
+                    hideSearch={true}
+                    defaultFirst={15}
+                    noun="changeset"
+                    pluralNoun="changesets"
+                    history={history}
+                    location={location}
+                    useURLQuery={true}
+                    listComponent="div"
+                    listClassName="campaign-changesets__grid mb-3"
+                    headComponent={CampaignChangesetsHeader}
+                    // Only show the empty element, if no filters are selected.
+                    emptyElement={
+                        filtersSelected(changesetFilters) ? (
+                            <EmptyChangesetSearchElement />
+                        ) : (
+                            <EmptyChangesetListElement />
+                        )
+                    }
+                    noSummaryIfAllNodesVisible={true}
+                />
+                {hoverState?.hoverOverlayProps && (
+                    <WebHoverOverlay
+                        {...hoverState.hoverOverlayProps}
+                        telemetryService={telemetryService}
+                        extensionsController={extensionsController}
+                        isLightTheme={isLightTheme}
+                        location={location}
+                        platformContext={platformContext}
+                        hoverRef={nextOverlayElement}
+                        onCloseButtonClick={nextCloseButtonClick}
+                    />
+                )}
+            </div>
+
+            <div className="list-group position-relative" ref={nextContainerElement}>
+                <FilteredConnection<ChangesetFields, Omit<ChangesetNodeProps, 'node'>>
+                    className="mt-2"
+                    nodeComponent={ChangesetNode}
+                    nodeComponentProps={{
+                        isLightTheme,
+                        viewerCanAdminister,
+                        history,
+                        location,
+                        extensionInfo: { extensionsController, hoverifier },
+                        expandByDefault,
+                        queryExternalChangesetWithFileDiffs,
+                    }}
+                    queryConnection={queryDetachedChangesetsConnection}
                     hideSearch={true}
                     defaultFirst={15}
                     noun="changeset"

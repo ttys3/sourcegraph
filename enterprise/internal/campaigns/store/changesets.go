@@ -426,6 +426,7 @@ type ListChangesetsOpts struct {
 	ExternalCheckState  *campaigns.ChangesetCheckState
 	OwnedByCampaignID   int64
 	ExternalServiceID   string
+	OnlyDetached        bool
 	TextSearch          []search.TextSearchTerm
 }
 
@@ -467,7 +468,11 @@ func listChangesetsQuery(opts *ListChangesetsOpts) *sqlf.Query {
 	}
 
 	if opts.CampaignID != 0 {
-		preds = append(preds, sqlf.Sprintf("changesets.campaign_ids ? %s", strconv.Itoa(int(opts.CampaignID))))
+		if opts.OnlyDetached {
+			preds = append(preds, sqlf.Sprintf("changesets.owned_by_campaign_id = %d", opts.CampaignID))
+		} else {
+			preds = append(preds, sqlf.Sprintf("changesets.campaign_ids ? %s", strconv.Itoa(int(opts.CampaignID))))
+		}
 	}
 
 	if len(opts.IDs) > 0 {
