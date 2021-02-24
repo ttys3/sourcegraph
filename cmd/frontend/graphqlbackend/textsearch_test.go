@@ -404,14 +404,22 @@ func TestLimitSearcherRepos(t *testing.T) {
 }
 
 func TestFileMatch_Limit(t *testing.T) {
-	f := func(fmInput FileMatch, limitInput uint32) bool {
-		// If we ask for a *FileMatch we may get nil
-		fm := &fmInput
+	type reflectableFileMatch struct {
+		LineMatches []LineMatch
+		Symbols     []int
+	}
+	f := func(fmInput reflectableFileMatch, limitInput uint32) bool {
+		fm := FileMatch{
+			Symbols: make([]*SearchSymbolResult, len(fmInput.Symbols)),
+		}
+		for _, lm := range fmInput.LineMatches {
+			fm.LineMatches = append(fm.LineMatches, &lm)
+		}
 
 		// It isn't interesting to test limit > ResultCount, so we bound it to
-		// [0, ResultCount]
+		// [1, ResultCount]
 		count := fm.ResultCount()
-		limit := int(limitInput) % (count + 1)
+		limit := (int(limitInput) % count) + 1
 
 		after := fm.Limit(limit)
 		newCount := fm.ResultCount()
