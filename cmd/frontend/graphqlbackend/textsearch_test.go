@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"testing/quick"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -400,4 +401,27 @@ func TestLimitSearcherRepos(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFileMatch_Limit(t *testing.T) {
+	f := func(fmInput FileMatch, limitInput uint32) bool {
+		// If we ask for a *FileMatch we may get nil
+		fm := &fmInput
+
+		// It isn't interesting to test limit > ResultCount, so we bound it to
+		// [0, ResultCount]
+		count := fm.ResultCount()
+		limit := int(limitInput) % (count + 1)
+
+		after := fm.Limit(limit)
+		newCount := fm.ResultCount()
+
+		if after == count-limit && newCount == limit {
+			return true
+		}
+
+		t.Logf("failed limit=%d count=%d => after=%d newCount=%d", limit, count, after, newCount)
+		return false
+	}
+	quick.Check(f, nil)
 }
