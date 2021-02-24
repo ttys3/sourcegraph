@@ -62,11 +62,41 @@ const FILTER_TYPE_COMPLETIONS: Omit<Monaco.languages.CompletionItem, 'range'>[] 
         sortText: `0${index}`,
     }))
 
+const escapeSpaces = (name: string): string => {
+    const escaped: string[] = []
+    let current = 0
+    while (name[current]) {
+        switch (name[current]) {
+            case '\\': {
+                if (name[current + 1]) {
+                    escaped.push('\\', name[current + 1])
+                    current = current + 2 // Continue past escaped value.
+                    continue
+                }
+                escaped.push('\\')
+                current = current + 1
+                continue
+            }
+            case ' ': {
+                escaped.push('\\', ' ')
+                current = current + 1
+                continue
+            }
+            default:
+                escaped.push(name[current])
+                current = current + 1
+                continue
+        }
+    }
+    return escaped.join('')
+}
+
 const repositoryToCompletion = (
     { name }: IRepository,
     options: { isFilterValue: boolean; globbing: boolean }
 ): PartialCompletionItem => {
     let insertText = options.globbing ? name : `^${escapeRegExp(name)}$`
+    insertText = insertText.includes(' ') ? escapeSpaces(insertText) : insertText
     insertText = (options.isFilterValue ? insertText : `${FilterType.repo}:${insertText}`) + ' '
     return {
         label: name,
@@ -82,6 +112,7 @@ const fileToCompletion = (
     options: { isFilterValue: boolean; globbing: boolean }
 ): PartialCompletionItem => {
     let insertText = options.globbing ? path : `^${escapeRegExp(path)}$`
+    insertText = insertText.includes(' ') ? escapeSpaces(insertText) : insertText
     insertText = (options.isFilterValue ? insertText : `${FilterType.file}:${insertText}`) + ' '
     return {
         label: name,
