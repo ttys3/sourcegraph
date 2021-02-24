@@ -39,6 +39,7 @@ import { SearchPatternType } from '../../../../shared/src/graphql-operations'
 import { shouldDisplayPerformanceWarning } from '../backend'
 import { VersionContextWarning } from './VersionContextWarning'
 import { CodeMonitoringProps } from '../../enterprise/code-monitoring'
+import { escapeSpaces } from '../../../../shared/src/search/query/filters'
 
 export interface SearchResultsProps
     extends ExtensionsControllerProps<'executeCommand' | 'extHostAPI' | 'services'>,
@@ -380,7 +381,7 @@ export class SearchResults extends React.Component<SearchResultsProps, SearchRes
                 .filter(filter => filter.kind === 'repo' && filter.value !== '')
                 .map(filter => ({
                     name: filter.label,
-                    value: filter.value,
+                    value: escapeSpaces(filter.value),
                     count: filter.count,
                     limitHit: filter.limitHit,
                 }))

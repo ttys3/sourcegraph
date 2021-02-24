@@ -373,3 +373,32 @@ export const validateFilter = (
     }
     return { valid: true }
 }
+
+export const escapeSpaces = (name: string): string => {
+    const escaped: string[] = []
+    let current = 0
+    while (name[current]) {
+        switch (name[current]) {
+            case '\\': {
+                if (name[current + 1]) {
+                    escaped.push('\\', name[current + 1])
+                    current = current + 2 // Continue past escaped value.
+                    continue
+                }
+                escaped.push('\\')
+                current = current + 1
+                continue
+            }
+            case ' ': {
+                escaped.push('\\', ' ')
+                current = current + 1
+                continue
+            }
+            default:
+                escaped.push(name[current])
+                current = current + 1
+                continue
+        }
+    }
+    return escaped.join('')
+}
