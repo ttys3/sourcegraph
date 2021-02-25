@@ -6,8 +6,10 @@ package search
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/sourcegraph/sourcegraph/cmd/frontend/graphqlbackend"
@@ -264,6 +266,7 @@ type args struct {
 	Version        string
 	PatternType    string
 	VersionContext string
+	Display        int
 }
 
 func parseURLQuery(q url.Values) (*args, error) {
@@ -284,6 +287,12 @@ func parseURLQuery(q url.Values) (*args, error) {
 
 	if a.Query == "" {
 		return nil, errors.New("no query found")
+	}
+
+	display := get("display", "-1")
+	var err error
+	if a.Display, err = strconv.Atoi(display); err != nil {
+		return nil, fmt.Errorf("display must be an integer, got %q: %w", display, err)
 	}
 
 	return &a, nil
