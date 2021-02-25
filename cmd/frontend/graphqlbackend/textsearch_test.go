@@ -404,15 +404,15 @@ func TestLimitSearcherRepos(t *testing.T) {
 }
 
 func TestFileMatch_Limit(t *testing.T) {
-	type reflectableFileMatch struct {
-		LineMatches []LineMatch
-		Symbols     []int
-	}
-	f := func(fmInput reflectableFileMatch, limitInput uint32) bool {
+	f := func(lineMatches []LineMatch, symbols []int, limitInput uint32) bool {
 		fm := FileMatch{
-			Symbols: make([]*SearchSymbolResult, len(fmInput.Symbols)),
+			// SearchSymbolResult fails to generate due to private fields. So
+			// we just generate a slice of ints and use its length. This is
+			// fine for limit which only looks at the slice and not in it.
+			Symbols: make([]*SearchSymbolResult, len(symbols)),
 		}
-		for _, lm := range fmInput.LineMatches {
+		// We don't use *LineMatch as args since quick can generate nil.
+		for _, lm := range lineMatches {
 			fm.LineMatches = append(fm.LineMatches, &lm)
 		}
 
