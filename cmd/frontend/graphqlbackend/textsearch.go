@@ -80,11 +80,6 @@ func (fm *FileMatch) Limit(limit int) int {
 		return after
 	}
 
-	// File path match. Nothing to mutate, just count as 1.
-	if len(fm.LineMatches) == 0 && len(fm.Symbols) == 0 {
-		return limit - 1
-	}
-
 	// Invariant: limit > 0
 	for i, m := range fm.LineMatches {
 		after := limit - len(m.OffsetAndLengths)

@@ -459,6 +459,12 @@ func TestFileMatch_Limit(t *testing.T) {
 			OffsetAndLengths: [][2]int32{{1, 1}},
 		}},
 		Limit: 1,
+	}, {
+		Name:  "file path match",
+		Limit: 1,
+	}, {
+		Name:  "file path match 2",
+		Limit: 2,
 	}}
 
 	for _, c := range cases {
