@@ -139,6 +139,11 @@ func (r *CommitSearchResultResolver) ResultCount() int32 {
 	return 1
 }
 
+func (r *CommitSearchResultResolver) Limit(limit int) int {
+	// Always represents one result and limit > 0 so we just return limit - 1.
+	return limit - 1
+}
+
 func commitParametersToDiffParameters(ctx context.Context, op *search.CommitParameters) (*search.DiffParameters, error) {
 	args := []string{
 		"--no-prefix",
