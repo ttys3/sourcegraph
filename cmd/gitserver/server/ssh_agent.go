@@ -67,6 +67,7 @@ func (a *SSHAgent) Listen() {
 			log15.Error("error accepting socket connection", "err", err)
 			return
 		}
+		log15.Error("accepted connection")
 
 		// We don't control how SSH handles the agent, so we should handle
 		// this "correctly" and spawn another goroutine, even though in
