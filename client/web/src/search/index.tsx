@@ -1,6 +1,6 @@
 import { escapeRegExp } from 'lodash'
 import { replaceRange } from '../../../shared/src/util/strings'
-import { discreteValueAliases, FilterType } from '../../../shared/src/search/query/filters'
+import { discreteValueAliases, FilterType, escapeSpaces } from '../../../shared/src/search/query/filters'
 import { VersionContext } from '../schema/site.schema'
 import { SearchPatternType } from '../../../shared/src/graphql-operations'
 import { Observable } from 'rxjs'
@@ -140,9 +140,9 @@ export function appendContextFilterToQuery(query: string, searchContextSpec: str
 
 export function repoFilterForRepoRevision(repoName: string, globbing: boolean, revision?: string): string {
     if (globbing) {
-        return `${quoteIfNeeded(`${repoName}${revision ? `@${abbreviateOID(revision)}` : ''}`)}`
+        return `${escapeSpaces(`${repoName}${revision ? `@${abbreviateOID(revision)}` : ''}`)}`
     }
-    return `${quoteIfNeeded(`^${escapeRegExp(repoName)}$${revision ? `@${abbreviateOID(revision)}` : ''}`)}`
+    return `${escapeSpaces(`^${escapeRegExp(repoName)}$${revision ? `@${abbreviateOID(revision)}` : ''}`)}`
 }
 
 export function searchQueryForRepoRevision(repoName: string, globbing: boolean, revision?: string): string {
