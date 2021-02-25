@@ -49,11 +49,14 @@ func (m *locationsCountMigrator) Progress(ctx context.Context) (float64, error) 
 	return progress, nil
 }
 
+//
+// TODO - redocument
+
 const locationsCountMigratorProgressQuery = `
 -- source: enterprise/internal/codeintel/stores/lsifstore/migration_definitions_count.go:Progress
 SELECT CASE c2.count WHEN 0 THEN 1 ELSE cast(c1.count as float) / cast(c2.count as float) END FROM
-	(SELECT COUNT(*) as count FROM %s WHERE schema_version >= 2) c1,
-	(SELECT COUNT(*) as count FROM %s) c2
+	(SELECT sum(num_records) as count FROM %s_schema_version_counts WHERE schema_version >= 2) c1,
+	(SELECT sum(num_records) as count FROM %s_schema_version_counts) c2
 `
 
 // LocationCountMigrationBatchSize is the number of records that should be selected for
