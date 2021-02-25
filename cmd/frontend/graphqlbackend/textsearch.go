@@ -85,15 +85,12 @@ func (fm *FileMatch) Limit(limit int) int {
 		return limit - 1
 	}
 
+	// Invariant: limit > 0
 	for i, m := range fm.LineMatches {
 		after := limit - len(m.OffsetAndLengths)
-		if after == 0 {
+		if after <= 0 {
 			fm.Symbols = nil
-			fm.LineMatches = fm.LineMatches[:i-1]
-			return 0
-		} else if after < 0 {
-			fm.Symbols = nil
-			fm.LineMatches = fm.LineMatches[:i]
+			fm.LineMatches = fm.LineMatches[:i+1]
 			m.OffsetAndLengths = m.OffsetAndLengths[:limit]
 			return 0
 		}

@@ -404,8 +404,16 @@ func TestLimitSearcherRepos(t *testing.T) {
 }
 
 func TestFileMatch_Limit(t *testing.T) {
+	desc := func(fm *FileMatch) string {
+		parts := []string{fmt.Sprintf("symbols=%d", len(fm.Symbols))}
+		for _, lm := range fm.LineMatches {
+			parts = append(parts, fmt.Sprintf("lm=%d", len(lm.OffsetAndLengths)))
+		}
+		return strings.Join(parts, " ")
+	}
+
 	f := func(lineMatches []LineMatch, symbols []int, limitInput uint32) bool {
-		fm := FileMatch{
+		fm := &FileMatch{
 			// SearchSymbolResult fails to generate due to private fields. So
 			// we just generate a slice of ints and use its length. This is
 			// fine for limit which only looks at the slice and not in it.
@@ -413,8 +421,10 @@ func TestFileMatch_Limit(t *testing.T) {
 		}
 		// We don't use *LineMatch as args since quick can generate nil.
 		for _, lm := range lineMatches {
+			lm := lm
 			fm.LineMatches = append(fm.LineMatches, &lm)
 		}
+		beforeDesc := desc(fm)
 
 		// It isn't interesting to test limit > ResultCount, so we bound it to
 		// [1, ResultCount]
@@ -424,12 +434,38 @@ func TestFileMatch_Limit(t *testing.T) {
 		after := fm.Limit(limit)
 		newCount := fm.ResultCount()
 
-		if after == count-limit && newCount == limit {
+		if after == 0 && newCount == limit {
 			return true
 		}
 
-		t.Logf("failed limit=%d count=%d => after=%d newCount=%d", limit, count, after, newCount)
+		afterDesc := desc(fm)
+		t.Logf("failed limit=%d count=%d => after=%d newCount=%d:\nbeforeDesc: %s\nafterDesc:  %s", limit, count, after, newCount, beforeDesc, afterDesc)
 		return false
 	}
-	quick.Check(f, nil)
+	t.Run("quick", func(t *testing.T) {
+		if err := quick.Check(f, nil); err != nil {
+			t.Error("quick check failed")
+		}
+	})
+
+	cases := []struct {
+		Name        string
+		LineMatches []LineMatch
+		Symbols     int
+		Limit       int
+	}{{
+		Name: "1 line match",
+		LineMatches: []LineMatch{{
+			OffsetAndLengths: [][2]int32{{1, 1}},
+		}},
+		Limit: 1,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.Name, func(t *testing.T) {
+			if !f(c.LineMatches, make([]int, c.Symbols), uint32(c.Limit)) {
+				t.Error("failed")
+			}
+		})
+	}
 }
